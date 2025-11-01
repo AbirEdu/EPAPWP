@@ -1,0 +1,502 @@
+/* ===== Base Styling ===== */
+body {
+  background-color: #f8f9fa; /* Light background */
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  color: #333;
+}
+
+/* ===== Navbar Styling ===== */
+.navbar {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand {
+  color: #2c3e50 !important;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* ✅ Ekalavya Title Font */
+.ekalavya-title {
+  font-family: "Permanent Marker", cursive;
+  font-size: 1.8rem;
+  color: #1a1a1a;
+  letter-spacing: 1px;
+}
+
+/* ✅ Logo: Full display, no circle, no border */
+.navbar-brand img {
+  height: 75px;
+  width: auto;
+  margin-right: 1px;
+  object-fit: contain;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ===== Card Styling ===== */
+.card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ✅ Balanced founder image style */
+.card img {
+  width: 100%;
+  height: 320px;              /* Fixed frame height */
+  object-fit: cover;          /* Fills the frame proportionally */
+  object-position: center top;/* Keeps faces near the top visible */
+  border-radius: 0;
+  background-color: #fff;
+}
+
+/* Center text and spacing below images */
+.card-body {
+  padding: 15px;
+}
+/* ===== FOOTER SECTION ===== */
+.footer {
+  background-color: #111;
+  color: #bbb;
+  font-size: 0.95rem;
+}
+
+.footer h6 {
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.footer a {
+  color: #bbb;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.footer a:hover {
+  color: #fff;
+}
+
+.footer-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+/* ===== SOCIAL ICONS ===== */
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.social-icon.facebook {
+  background-color: #1877f2;
+}
+
+.social-icon.instagram {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+}
+
+.social-icon.youtube {
+  background-color: #ff0000;
+}
+
+.social-icon:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+/* ===== FOOTER BOTTOM ===== */
+.footer-bottom {
+  background-color: #000;               /* strong contrast */
+  border-top: 1px solid #333;
+  padding: 15px 0;
+  color: #ddd;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.footer-bottom .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Footer bottom links */
+.footer-bottom a {
+  color: #ddd;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-bottom a:hover {
+  color: #fff;
+}
+
+.footer-bottom span {
+  color: #777;
+  margin: 0 8px;
+}
+
+.footer-credit {
+  color: #aaa;
+}
+
+/* ===== Footer Visibility Fix ===== */
+
+/* Lighten muted text for readability */
+.footer p,
+.footer .text-muted,
+.footer small,
+.footer li {
+  color: #ccc !important; /* Light grey text for visibility */
+}
+
+/* Lighter link color with better hover */
+.footer a {
+  color: #ddd !important;
+}
+.footer a:hover {
+  color: #fff !important;
+}
+
+/* Footer headings should pop */
+.footer h5,
+.footer h6 {
+  color: #fff !important;
+  font-weight: 700;
+}
+
+/* Social icons remain bright and visible */
+.social-icon i {
+  color: #fff !important;
+}
+
+/* Copyright text at bottom */
+.footer-bottom,
+.footer-bottom a,
+.footer-bottom div {
+  color: #ccc !important;
+}
+
+/* Description paragraph (About section) */
+.footer p.small {
+  color: #ccc !important;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+/* ===== FOOTER COLUMN SEPARATORS ===== */
+
+/* Add vertical separators between columns on desktop */
+.footer .row > div {
+  position: relative;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.footer .row > div:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  right: 0;
+  width: 1px;
+  height: 80%;
+  background-color: rgba(255, 255, 255, 0.1); /* subtle divider */
+}
+
+/* Adjust spacing and remove lines on mobile */
+@media (max-width: 768px) {
+  .footer .row > div {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .footer .row > div:not(:last-child)::after {
+    display: none;
+  }
+
+  .footer .row > div:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .footer {
+    text-align: center;
+  }
+
+  .footer .d-flex {
+    justify-content: center !important;
+  }
+
+  .footer-bottom .container {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+}
+
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .ekalavya-title {
+    font-size: 1.4rem;
+  }
+
+  .navbar-brand img {
+    height: 45px;
+  }
+}
+
+
+/* ===== Carousel Styling (Responsive Full Height) ===== */
+#home {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.carousel,
+.carousel-inner,
+.carousel-item,
+.carousel-item img {
+  width: 100%;
+  height: 100vh; /* 🔥 Full viewport height */
+}
+
+/* Make images adapt fully */
+.carousel-item img {
+  object-fit: cover;          /* fills the frame but keeps focus center */
+  object-position: center;    /* centers subject */
+  filter: brightness(0.9);    /* improves text visibility */
+}
+
+/* ===== Captions Styling ===== */
+.custom-caption {
+  position: absolute;
+  bottom: 10%; /* Always stays visible above indicators */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  max-width: 900px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 10px;
+  padding: 20px 25px;
+  color: #fff;
+}
+
+.custom-caption h5 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.custom-caption p {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  color: #f0f0f0;
+  line-height: 1.4;
+}
+
+/* ===== Indicators (Dots) ===== */
+.carousel-indicators {
+  bottom: 20px;
+}
+
+.carousel-indicators [data-bs-target] {
+  background-color: #ccc;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+.carousel-indicators .active {
+  background-color: #007bff;
+  opacity: 1;
+}
+
+/* ===== Responsive Tweaks ===== */
+@media (max-width: 992px) {
+  .carousel-item img {
+    height: 75vh; /* smaller on tablets */
+  }
+
+  .custom-caption {
+    bottom: 8%;
+    width: 90%;
+    padding: 15px;
+  }
+
+  .custom-caption h5 {
+    font-size: 1.5rem;
+  }
+
+  .custom-caption p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .carousel-item img {
+    height: 60vh; /* smaller on phones */
+  }
+
+  .custom-caption {
+    bottom: 5%;
+    padding: 10px;
+  }
+
+  .custom-caption h5 {
+    font-size: 1.2rem;
+  }
+
+  .custom-caption p {
+    font-size: 0.9rem;
+  }
+}
+
+
+/* ===== Feedback Section Styling ===== */
+#feedback {
+  background-color: #f8f9fa;
+}
+
+#feedback .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 10px;
+}
+
+#feedback .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+#feedback iframe {
+  border-radius: 10px 10px 0 0;
+}
+
+#feedback .card-body {
+  background-color: #fff;
+}
+
+#feedbackForm input,
+#feedbackForm textarea {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#feedbackForm button {
+  border-radius: 8px;
+}
+
+
+/* ===== Recent Performances Section ===== */
+#performances {
+  background-color: #f8f9fa;
+}
+
+#performances h2 {
+  font-weight: 600;
+  color: #222;
+}
+
+#performances .card {
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+#performances .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+#performances .card-body {
+  background-color: #fff;
+}
+
+#performances iframe,
+#performances img {
+  border-radius: 10px 10px 0 0;
+  object-fit: cover;
+}
+
+#performances p {
+  color: #444;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+
+/* ===== About Us Section ===== */
+#about {
+  background-color: #fff;
+}
+
+#about h2 {
+  font-weight: 600;
+  color: #222;
+}
+
+#about .card {
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+#about .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+#about .card-img-top {
+  height: 280px;
+  object-fit: cover;
+}
+
+#about .card-body {
+  background-color: #fff;
+}
+
+#about .card-title {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+#about .card-text {
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
