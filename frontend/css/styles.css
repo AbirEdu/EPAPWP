@@ -312,6 +312,25 @@ body {
 
 .about-body { color: var(--text-muted); line-height: 1.8; }
 
+.about-tagline {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--gold);
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.about-subhead {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-dark);
+  margin: 20px 0 10px;
+}
+
+.about-subhead i { color: var(--crimson); margin-right: 8px; }
+
 .stat-box {
   background: #fff;
   border-left: 4px solid var(--crimson);
@@ -330,30 +349,63 @@ body {
 
 .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
 
-.dept-grid {
+.stat-grid-10 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 56px;
 }
 
-.dept-card {
+.wwd-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.wwd-card {
   background: #fff;
   border: 1px solid #eee;
   border-radius: 10px;
-  padding: 20px 16px;
-  text-align: center;
+  padding: 22px 20px;
   transition: var(--transition);
   box-shadow: var(--card-shadow);
 }
 
-.dept-card:hover {
+.wwd-card:hover {
   border-color: var(--crimson);
   transform: translateY(-4px);
   box-shadow: var(--card-hover-shadow);
 }
 
-.dept-card i { display: block; font-size: 1.8rem; color: var(--crimson); margin-bottom: 8px; }
-.dept-card span { font-size: 0.82rem; font-weight: 600; color: var(--text-dark); }
+.wwd-card i { display: block; font-size: 1.6rem; color: var(--crimson); margin-bottom: 10px; }
+.wwd-card h6 { font-size: 0.92rem; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+.wwd-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0; }
+
+.about-vision { margin-top: 48px; }
+.about-mission { margin-top: 48px; }
+
+.mission-list {
+  display: flex;
+  flex-direction: column;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.mission-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5ded3;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.mission-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.about-journey { margin-top: 48px; }
 
 /* ===== PICTURE WICTURE ===== */
 .pw-card {
@@ -685,18 +737,18 @@ body {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 992px) {
-  .dept-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-grid-10 { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 768px) {
   .section-pad { padding: 56px 0; }
-  .dept-grid { grid-template-columns: repeat(3, 1fr); }
+  .stat-grid-10 { grid-template-columns: repeat(2, 1fr); }
   .ekalavya-title { font-size: 1rem; }
   .nav-logo { height: 38px; }
 }
 
 @media (max-width: 480px) {
-  .dept-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-grid-10 { grid-template-columns: repeat(2, 1fr); }
   .hero-content { padding: 0 16px; }
 }
 
