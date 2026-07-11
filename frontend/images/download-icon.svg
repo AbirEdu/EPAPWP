@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+  <!-- Arrow shaft -->
+  <line x1="18" y1="4" x2="18" y2="22" stroke="#8B0000" stroke-width="2.8" stroke-linecap="round"/>
+  <!-- Arrow head -->
+  <polyline points="10,15 18,23 26,15" fill="none" stroke="#8B0000" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Tray base -->
+  <path d="M6 27 h24" stroke="#8B0000" stroke-width="2.8" stroke-linecap="round"/>
+  <!-- Tray sides -->
+  <path d="M6 22 v5 M30 22 v5" stroke="#8B0000" stroke-width="2.8" stroke-linecap="round"/>
+</svg>

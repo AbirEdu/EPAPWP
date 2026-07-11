@@ -1,0 +1,19 @@
+# macOS junk files
+._*
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Environment/secrets
+.env
+*.env
+
+# Node (if frontend ever adds tooling)
+node_modules/
+
+# Editor/IDE
+.vscode/

@@ -1,0 +1,15 @@
+# Mac metadata — causes xattr errors on external drives
+.DS_Store
+._*
+._.DS_Store
+**/.DS_Store
+**/._*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Dev files
+.env
+.git

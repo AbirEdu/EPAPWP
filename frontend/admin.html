@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Ekalavya Performing Arts</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <!-- LOGIN SCREEN (shown when not authenticated) -->
+  <div id="adminLoginScreen" class="admin-login-screen">
+    <div class="admin-login-card">
+      <div class="admin-login-top">
+        <div class="admin-login-logo"><i class="bi bi-masks-theater"></i></div>
+        <h3>Ekalavya Admin</h3>
+        <p>Sign in to manage registrations</p>
+      </div>
+      <form id="adminLoginForm">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-person input-icon"></i>
+            <input type="text" class="form-control input-with-icon" id="adminUser" placeholder="admin" autocomplete="username" required>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-lock input-icon"></i>
+            <input type="password" class="form-control input-with-icon" id="adminPass" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="button" class="btn-eye" onclick="togglePwd('adminPass',this)"><i class="bi bi-eye"></i></button>
+          </div>
+        </div>
+        <div id="adminLoginError" class="alert alert-danger d-none py-2 small mb-3"></div>
+        <button type="submit" class="btn btn-admin-login w-100" id="adminLoginBtn">
+          <span id="adminLoginText"><i class="bi bi-shield-lock me-1"></i>Sign In</span>
+          <span id="adminLoginSpinner" class="d-none"><span class="spinner-border spinner-border-sm me-2"></span>Authenticating...</span>
+        </button>
+      </form>
+      <div class="mt-3 text-center"><a href="index.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back to website</a></div>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD (shown after login) -->
+  <div id="adminDashboard" class="d-none">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <i class="bi bi-masks-theater brand-icon"></i>
+        <div>
+          <span class="brand-title">Ekalavya</span>
+          <span class="brand-sub">Admin Panel</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tab="dashboard" onclick="showTab('dashboard',this)"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+        <a class="nav-item" data-tab="members" onclick="showTab('members',this)"><i class="bi bi-people"></i><span>Members</span></a>
+        <a class="nav-item" data-tab="feedback" onclick="showTab('feedback',this)"><i class="bi bi-chat-left-text"></i><span>Feedback</span></a>
+        <a class="nav-item" data-tab="users" onclick="showTab('users',this)"><i class="bi bi-person-gear"></i><span>Admin Users</span></a>
+        <a class="nav-item" data-tab="newmember" onclick="showTab('newmember',this)"><i class="bi bi-person-plus"></i><span>Add Member</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-pill" id="sidebarUserPill"></div>
+        <button class="btn-logout" onclick="adminLogout()"><i class="bi bi-box-arrow-left"></i> Logout</button>
+        <a href="index.html" class="btn-back-site mt-2"><i class="bi bi-globe"></i> View Site</a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Top bar -->
+      <div class="admin-topbar">
+        <button class="btn-sidebar-toggle d-lg-none" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-right" id="topbarUser"></div>
+      </div>
+
+      <!-- DASHBOARD TAB -->
+      <div id="tab-dashboard" class="tab-pane">
+        <div class="row g-4 mb-4">
+          <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card-icon bg-crimson"><i class="bi bi-people-fill"></i></div><div><div class="stat-card-num" id="stat-total">—</div><div class="stat-card-label">Total Members</div></div></div></div>
+          <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card-icon bg-amber"><i class="bi bi-clock-fill"></i></div><div><div class="stat-card-num" id="stat-pending">—</div><div class="stat-card-label">Pending</div></div></div></div>
+          <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card-icon bg-green"><i class="bi bi-check-circle-fill"></i></div><div><div class="stat-card-num" id="stat-approved">—</div><div class="stat-card-label">Approved</div></div></div></div>
+          <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card-icon bg-blue"><i class="bi bi-chat-left-dots-fill"></i></div><div><div class="stat-card-num" id="stat-feedback">—</div><div class="stat-card-label">Feedback</div></div></div></div>
+        </div>
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="admin-card">
+              <div class="admin-card-header"><h6>Recent Registrations</h6><button class="btn-link" onclick="showTab('members',null)">View all →</button></div>
+              <div class="admin-card-body"><div id="recentMembersList" class="members-mini-list">Loading...</div></div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="admin-card">
+              <div class="admin-card-header"><h6>Interest Distribution</h6></div>
+              <div class="admin-card-body"><div id="interestChart"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBERS TAB -->
+      <div id="tab-members" class="tab-pane d-none">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h6>All Registrations</h6>
+            <div class="d-flex gap-2">
+              <select class="form-select form-select-sm" id="statusFilter" onchange="loadMembers()" style="width:130px">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <button class="btn btn-sm btn-crimson" onclick="loadMembers()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+            </div>
+          </div>
+          <div class="admin-card-body p-0">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr><th>Name</th><th>Email</th><th>Phone</th><th>Interests</th><th>Registered</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="membersTableBody"><tr><td colspan="7" class="text-center py-4">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEEDBACK TAB -->
+      <div id="tab-feedback" class="tab-pane d-none">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h6>Member Feedback</h6>
+            <button class="btn btn-sm btn-crimson" onclick="loadFeedback()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+          </div>
+          <div class="admin-card-body">
+            <div id="feedbackList" class="feedback-admin-list">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS TAB -->
+      <div id="tab-users" class="tab-pane d-none">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="admin-card">
+              <div class="admin-card-header"><h6>Admin Users</h6><button class="btn btn-sm btn-crimson" onclick="loadUsers()"><i class="bi bi-arrow-clockwise"></i></button></div>
+              <div class="admin-card-body p-0">
+                <table class="admin-table">
+                  <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody id="usersTableBody"><tr><td colspan="5" class="text-center py-4">Loading...</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="admin-card">
+              <div class="admin-card-header"><h6><i class="bi bi-person-plus me-1"></i>Create Admin User</h6></div>
+              <div class="admin-card-body">
+                <form id="createUserForm">
+                  <div class="mb-3"><label class="form-label">Full Name</label><input type="text" class="form-control" name="full_name" placeholder="Full Name" required></div>
+                  <div class="mb-3"><label class="form-label">Username</label><input type="text" class="form-control" name="username" placeholder="username" required></div>
+                  <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="input-icon-wrap">
+                      <input type="password" class="form-control" name="password" placeholder="Min 8 chars" required minlength="8">
+                      <button type="button" class="btn-eye" onclick="togglePwd('createUserForm [name=password]',this)"><i class="bi bi-eye"></i></button>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" name="role">
+                      <option value="admin">Admin</option>
+                      <option value="volunteer">Volunteer</option>
+                      <option value="super_admin">Super Admin</option>
+                    </select>
+                  </div>
+                  <div id="createUserAlert" class="alert d-none py-2 small mb-3"></div>
+                  <button type="submit" class="btn btn-crimson w-100">Create User</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW MEMBER TAB -->
+      <div id="tab-newmember" class="tab-pane d-none">
+        <div class="row justify-content-center">
+          <div class="col-lg-9">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h6><i class="bi bi-person-plus me-2"></i>Register New Member</h6>
+              </div>
+              <div class="admin-card-body">
+                <form id="adminRegForm" novalidate>
+
+                  <h6 class="admin-form-section"><i class="bi bi-person me-2"></i>Personal Information</h6>
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6"><label class="form-label">Full Name (Block Letters) <span class="text-danger">*</span></label><input type="text" class="form-control" name="name" placeholder="ABIR BOSE" required></div>
+                    <div class="col-md-6"><label class="form-label">Parent's / Guardian's Name <span class="text-danger">*</span></label><input type="text" class="form-control" name="parent_name" required></div>
+                    <div class="col-md-6"><label class="form-label">Phone <span class="text-danger">*</span></label><input type="tel" class="form-control" name="phone" placeholder="9686706007" required></div>
+                    <div class="col-md-6"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" class="form-control" name="email" placeholder="you@example.com" required></div>
+                    <div class="col-md-4"><label class="form-label">Age <span class="text-danger">*</span></label><input type="number" class="form-control" name="age" min="5" max="100" required></div>
+                    <div class="col-md-4"><label class="form-label">Date of Birth <span class="text-danger">*</span></label><input type="date" class="form-control" name="dob" required></div>
+                    <div class="col-md-4"><label class="form-label">Aadhar Card No</label><input type="text" class="form-control" name="aadhar" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
+                    <div class="col-md-6">
+                      <label class="form-label">Occupation <span class="text-danger">*</span></label>
+                      <select class="form-select" name="occupation" required>
+                        <option value="">Select...</option>
+                        <option>Student</option><option>Working Professional</option>
+                        <option>Self Employed</option><option>Homemaker</option><option>Other</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6"><label class="form-label">School / College / Organization</label><input type="text" class="form-control" name="organization" placeholder="VTU, IIMB, etc."></div>
+                    <div class="col-12"><label class="form-label">Current Address <span class="text-danger">*</span></label><textarea class="form-control" name="current_address" rows="2" required></textarea></div>
+                    <div class="col-12"><label class="form-label">Permanent Address</label><textarea class="form-control" name="permanent_address" rows="2"></textarea></div>
+                  </div>
+
+                  <h6 class="admin-form-section"><i class="bi bi-star me-2"></i>Areas of Interest</h6>
+                  <div class="row g-2 mb-4">
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_acting" name="interests" value="Acting" autocomplete="off"><label class="btn interest-label w-100" for="a_acting"><i class="bi bi-masks-theater me-1"></i>Acting</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_dance" name="interests" value="Dance" autocomplete="off"><label class="btn interest-label w-100" for="a_dance"><i class="bi bi-person-arms-up me-1"></i>Dance</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_music" name="interests" value="Music" autocomplete="off"><label class="btn interest-label w-100" for="a_music"><i class="bi bi-music-note-beamed me-1"></i>Music</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_song" name="interests" value="Song" autocomplete="off"><label class="btn interest-label w-100" for="a_song"><i class="bi bi-mic me-1"></i>Song</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_recitation" name="interests" value="Recitation" autocomplete="off"><label class="btn interest-label w-100" for="a_recitation"><i class="bi bi-journal-text me-1"></i>Recitation</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_anchoring" name="interests" value="Anchoring" autocomplete="off"><label class="btn interest-label w-100" for="a_anchoring"><i class="bi bi-megaphone me-1"></i>Anchoring</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_direction" name="interests" value="Direction" autocomplete="off"><label class="btn interest-label w-100" for="a_direction"><i class="bi bi-camera-video me-1"></i>Direction</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_writing" name="interests" value="Creative Writing" autocomplete="off"><label class="btn interest-label w-100" for="a_writing"><i class="bi bi-pen me-1"></i>Creative Writing</label></div>
+                    <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="a_cinema" name="interests" value="Cinematography" autocomplete="off"><label class="btn interest-label w-100" for="a_cinema"><i class="bi bi-film me-1"></i>Cinematography</label></div>
+                  </div>
+
+                  <h6 class="admin-form-section"><i class="bi bi-bar-chart me-2"></i>Rate Yourself (1 = Beginner · 10 = Expert)</h6>
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6"><label class="form-label">Acting</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_acting" min="1" max="10" value="5" oninput="adminUpdateRating(this,'ar_acting')"><span id="ar_acting" class="rating-badge">5</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Dance</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_dance" min="1" max="10" value="5" oninput="adminUpdateRating(this,'ar_dance')"><span id="ar_dance" class="rating-badge">5</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Music</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_music" min="1" max="10" value="5" oninput="adminUpdateRating(this,'ar_music')"><span id="ar_music" class="rating-badge">5</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Song / Vocal</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_song" min="1" max="10" value="5" oninput="adminUpdateRating(this,'ar_song')"><span id="ar_song" class="rating-badge">5</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Recitation</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_recitation" min="1" max="10" value="5" oninput="adminUpdateRating(this,'ar_recitation')"><span id="ar_recitation" class="rating-badge">5</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Anchoring</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_anchoring" min="1" max="10" value="5" oninput="adminUpdateRating(this,'ar_anchoring')"><span id="ar_anchoring" class="rating-badge">5</span></div></div>
+                  </div>
+
+                  <h6 class="admin-form-section"><i class="bi bi-chat-heart me-2"></i>Why Ekalavya?</h6>
+                  <textarea class="form-control mb-4" name="motivation" rows="3" placeholder="Motivation / goals..."></textarea>
+
+                  <div id="adminRegAlert" class="alert d-none mb-3"></div>
+                  <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-crimson px-5"><i class="bi bi-send me-1"></i>Submit Registration</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('adminRegForm').reset();document.querySelectorAll('#tab-newmember .rating-badge').forEach(b=>b.textContent='5')">Clear Form</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Member Detail Modal -->
+  <div class="modal fade" id="memberDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background:#0f0f1a;color:#fff">
+          <h5 class="modal-title"><i class="bi bi-person-lines-fill me-2"></i>Member Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="memberDetailBody">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

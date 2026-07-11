@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ekalavya Performing Arts & Picture Wicture Productions</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg sticky-top" id="mainNav" style="padding:8px 16px;">
+    <div style="display:flex;align-items:center;width:100%;gap:0;">
+      <a href="#home" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+        <img src="images/epa_logo.png" alt="Ekalavya Performing Arts Logo" class="nav-logo" onerror="this.style.display='none'">
+        <span class="ekalavya-title">Ekalavya Performing Arts</span>
+      </a>
+      <div style="width:1px;height:36px;background:#e0dbd4;margin:0 8px;flex-shrink:0;"></div>
+      <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav" style="flex:1;">
+        <ul class="navbar-nav align-items-center" style="justify-content:center;flex-wrap:nowrap;width:100%;">
+          <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#picture-wicture" style="white-space:nowrap">Picture Wicture Productions</a></li>
+          <li class="nav-item"><a class="nav-link" href="#founder">EPA Founders</a></li>
+          <li class="nav-item"><a class="nav-link" href="#performances">Performances</a></li>
+          <li class="nav-item"><a class="nav-link" href="#feedback">Feedback</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          <li class="nav-item ms-3">
+            <button class="btn btn-admin-nav" onclick="openAdminLogin(event)">
+              <i class="bi bi-shield-lock me-1"></i>Admin
+            </button>
+          </li>
+          <li class="nav-item ms-2">
+            <button class="btn btn-join" id="joinUsBtn" onclick="openRegistrationDirect()">
+              <i class="bi bi-person-plus me-1"></i>Join Us
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <div style="width:1px;height:36px;background:#e0dbd4;margin:0 4px;"></div>
+        <a href="#picture-wicture" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+          <img src="images/pw_logo.png" alt="Picture Wicture Productions" class="pw-nav-logo">
+          <div class="pw-nav-text">
+            <span class="pw-name-line"><span class="pw-p">P</span><span class="pw-rest">icture </span><span class="pw-w">W</span><span class="pw-rest">icture </span><span class="pw-pg">P</span><span class="pw-rest">roductions</span></span>
+            <span class="pw-tagline">Where Art meets Entertainment</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO CAROUSEL -->
+  <section id="home">
+    <div id="eventCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4500" style="width:100%;">
+      <div class="carousel-indicators">
+        <button type="button" data-bs-target="#eventCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#eventCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#eventCarousel" data-bs-slide-to="2"></button>
+        <button type="button" data-bs-target="#eventCarousel" data-bs-slide-to="3"></button>
+      </div>
+      <div class="carousel-inner">
+
+        <!-- Slide 1: Kotha -->
+        <div class="carousel-item active">
+          <div class="hero-slide hero-slide-1 kotha-slide">
+            <div class="kotha-text hero-content">
+              <span class="hero-tag">Upcoming Event</span>
+              <h1>Katha</h1>
+              <p>A Tapestry of Bengali Theatre, with a Cherry on Top</p>
+              <p class="hero-meta"><i class="bi bi-calendar3"></i> Sat, 11 Jul 2026 &nbsp;·&nbsp; <i class="bi bi-geo-alt-fill"></i> Vyoma Artspace and Studio Theatre, J.P. Nagar Bangalore</p>
+              <button class="btn btn-hero" onclick="openRegistrationDirect()">Book Your Tickets</button>
+            </div>
+            <div class="kotha-image">
+              <img src="images/content/kotha.jpeg" alt="Katha" onerror="this.style.opacity=0">
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2: Dhanni Nobel Chor -->
+        <div class="carousel-item">
+          <div class="hero-slide hero-slide-2 kotha-slide">
+            <div class="kotha-text hero-content">
+              <span class="hero-tag">Picture Wicture Productions</span>
+              <h1>Katha &quot;Dhonyi Nobelchor&quot;</h1>
+              <p>When Satire Meets Tagore</p>
+              <p class="hero-meta"><i class="bi bi-calendar3"></i> Sat, 11 Jul 2026 &nbsp;·&nbsp; <i class="bi bi-geo-alt-fill"></i> Vyoma Artspace and Studio Theatre, J.P. Nagar Bangalore</p>
+              <button class="btn btn-hero" onclick="openRegistrationDirect()">Book Your Tickets</button>
+            </div>
+            <div class="kotha-image">
+              <img src="images/content/dnc.jpg" alt="Katha Dhonyi Nobelchor" onerror="this.style.opacity=0">
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3: Agnisikha -->
+        <div class="carousel-item">
+          <div class="hero-slide hero-slide-3 kotha-slide">
+            <div class="kotha-text hero-content">
+              <span class="hero-tag">New Production</span>
+              <h1>Katha &quot;Bhasan&quot;</h1>
+              <p>When Faith Divides, Humanity Bleeds</p>
+              <p class="hero-meta"><i class="bi bi-calendar3"></i> Sat, 11 Jul 2026 &nbsp;·&nbsp; <i class="bi bi-geo-alt-fill"></i> Vyoma Artspace and Studio Theatre, J.P. Nagar Bangalore</p>
+              <button class="btn btn-hero" onclick="openRegistrationDirect()">Book Your Tickets</button>
+            </div>
+            <div class="kotha-image">
+              <img src="images/content/bhasan.png" alt="Katha Bhasan" onerror="this.style.opacity=0">
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 4: Rangamancha -->
+        <div class="carousel-item">
+          <div class="hero-slide hero-slide-1 kotha-slide">
+            <div class="kotha-text hero-content">
+              <span class="hero-tag">Recent Performance</span>
+              <h1>Katha &quot;Ei Mrityur Upatraka&quot;</h1>
+              <p>Silence in Motion, Freedom in Expression</p>
+              <p class="hero-meta"><i class="bi bi-calendar3"></i> Sat, 11 Jul 2026 &nbsp;·&nbsp; <i class="bi bi-geo-alt-fill"></i> Vyoma Artspace and Studio Theatre, J.P. Nagar Bangalore</p>
+              <button class="btn btn-hero" onclick="openRegistrationDirect()">Book Your Tickets</button>
+            </div>
+            <div class="kotha-image">
+              <img src="images/content/emu.png" alt="Katha Ei Mrityur Upatraka" onerror="this.style.opacity=0">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+      <button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-strip">
+    <div class="marquee-track">
+      <span>We invite enthusiasts who loves 🎭 Theatre &nbsp;·&nbsp; 🎶 Music &nbsp;·&nbsp; 🎬 Cinematography &nbsp;·&nbsp; 🎤 Anchoring &nbsp;·&nbsp; 💃 Dance &nbsp;·&nbsp; 🎙️ Recitation &nbsp;·&nbsp; ✍️ Creative Writing &nbsp;·&nbsp; 🤹 Mime &nbsp;·&nbsp; 🧭 Direction &nbsp;·&nbsp; 🎪 Backstage &nbsp;·&nbsp; 💡 Light &nbsp;·&nbsp; 🔊 Sound</span>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section id="about" class="section-pad bg-cream">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <span class="section-label">Who We Are</span>
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+          <h2 class="section-title mb-0">About Ekalavya Performing Arts</h2>
+          <a href="docs/about-epa.pdf" download title="Download About EPA" class="about-download-icon">
+            <img src="images/download-icon.svg" alt="Download" width="34" height="34">
+          </a>
+        </div>
+      </div>
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <p class="about-lead">Ekalavya Performing Arts is a Bengaluru-based theatre collective of passionate artists, directors, musicians, and storytellers.</p>
+          <p class="about-body">We blend tradition with modern creativity — exploring society, human emotions, and culture through drama, mime, music, and dance. Based in Bengaluru with roots in Kolkata.</p>
+          <div class="row g-3 mt-3">
+            <div class="col-6"><div class="stat-box"><span class="stat-num">10+</span><span class="stat-label">Productions</span></div></div>
+            <div class="col-6"><div class="stat-box"><span class="stat-num">500+</span><span class="stat-label">Audience Reached</span></div></div>
+            <div class="col-6"><div class="stat-box"><span class="stat-num">3</span><span class="stat-label">Co-Founders</span></div></div>
+            <div class="col-6"><div class="stat-box"><span class="stat-num">6</span><span class="stat-label">Departments</span></div></div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="dept-grid">
+            <div class="dept-card"><i class="bi bi-camera-video"></i><span>Production</span></div>
+            <div class="dept-card"><i class="bi bi-masks-theater"></i><span>Performance</span></div>
+            <div class="dept-card"><i class="bi bi-music-note-beamed"></i><span>Music</span></div>
+            <div class="dept-card"><i class="bi bi-brush"></i><span>Light</span></div>
+            <div class="dept-card"><i class="bi bi-people"></i><span>Outreach</span></div>
+            <div class="dept-card"><i class="bi bi-pen"></i><span>Creative Writing</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PICTURE WICTURE -->
+  <section id="picture-wicture" class="section-pad bg-dark-stage">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <span class="section-label light">Our Productions Wing</span>
+        <h2 class="section-title light">Picture Wicture Productions</h2>
+        <p class="section-desc light">The cinematic and documentary arm of Ekalavya — capturing performances, short films, and cultural stories.</p>
+      </div>
+      <div class="row g-4 mb-5">
+        <div class="col-md-4"><div class="pw-card"><div class="pw-icon"><i class="bi bi-film"></i></div><h5>Short Films</h5><p>Socially conscious short films exploring Bengali culture, urban stories, and human emotions.</p></div></div>
+        <div class="col-md-4"><div class="pw-card"><div class="pw-icon"><i class="bi bi-camera"></i></div><h5>Documentaries</h5><p>Behind-the-scenes and stage documentaries preserving our theatrical heritage on film.</p></div></div>
+        <div class="col-md-4"><div class="pw-card"><div class="pw-icon"><i class="bi bi-play-circle"></i></div><h5>Performance Recordings</h5><p>High-quality recordings of live performances for archival and online audiences worldwide.</p></div></div>
+      </div>
+      <div class="section-header text-center mb-4">
+        <span class="section-label light">The Founding Team</span>
+        <h3 class="section-title light" style="font-size:1.6rem;">Founders of Picture Wicture Productions</h3>
+      </div>
+      <div class="pwp-founders-row">
+        <div class="pwp-fc"><div class="pwp-fc-img-wrap"><img src="images/pwp_founder1.jpg" alt="Kaushik Mukherjee"></div><h6 class="pwp-fc-name">Kaushik Mukherjee</h6><span class="pwp-fc-role">Co-Founder</span></div>
+        <div class="pwp-fc"><div class="pwp-fc-img-wrap"><img src="images/pwp_founder2.jpg" alt="Bodhisatta Sarkar"></div><h6 class="pwp-fc-name">Bodhisatta Sarkar</h6><span class="pwp-fc-role">Co-Founder</span></div>
+        <div class="pwp-fc"><div class="pwp-fc-img-wrap"><img src="images/pwp_founder3.jpg" alt="Dr. Tanumay Datta"></div><h6 class="pwp-fc-name">Dr. Tanumay Datta</h6><span class="pwp-fc-role">Co-Founder</span></div>
+        <div class="pwp-fc"><div class="pwp-fc-img-wrap"><img src="images/pwp_founder4.jpg" alt="Biplab Kundu"></div><h6 class="pwp-fc-name">Biplab Kundu</h6><span class="pwp-fc-role">Co-Founder</span></div>
+        <div class="pwp-fc"><div class="pwp-fc-img-wrap"><img src="images/pwp_founder5.jpg" alt="Abir Bose"></div><h6 class="pwp-fc-name">Abir Bose</h6><span class="pwp-fc-role">Co-Founder</span></div>
+        <div class="pwp-fc"><div class="pwp-fc-img-wrap"><img src="images/pwp_founder6.jpg" alt="Pavel Sengupta"></div><h6 class="pwp-fc-name">Pavel Sengupta</h6><span class="pwp-fc-role">Co-Founder</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDERS -->
+  <section id="founder" class="section-pad bg-white">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <span class="section-label">The Visionaries</span>
+        <h2 class="section-title">Our Founders</h2>
+      </div>
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+          <div class="founder-card">
+            <div class="founder-img-wrap"><img src="images/founder1.jpg" alt="Biplab Kundu" onerror="this.src='https://ui-avatars.com/api/?name=Biplab+Kundu&background=8B0000&color=fff&size=320'"></div>
+            <div class="founder-info"><h5>Biplab Kundu</h5><span class="founder-role">Co-Founder & Director</span><p>A passionate actor-director balancing an IT career with theatre. Has performed and directed numerous acclaimed plays, mimes, and fusions across Bengaluru and Kolkata.</p></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="founder-card">
+            <div class="founder-img-wrap"><img src="images/founder2.jpg" alt="Bodhisatta Sarkar" onerror="this.src='https://ui-avatars.com/api/?name=Bodhisatta+Sarkar&background=8B0000&color=fff&size=320'"></div>
+            <div class="founder-info"><h5>Bodhisatta Sarkar</h5><span class="founder-role">Co-Founder & Screenplay Director</span><p>Senior IT professional and theatre artist known for powerful scripts creating socially conscious plays exploring human emotions and contemporary issues.</p></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="founder-card">
+            <div class="founder-img-wrap"><img src="images/founder3.jpg" alt="Subarna Kundu" onerror="this.src='https://ui-avatars.com/api/?name=Subarna+Kundu&background=8B0000&color=fff&size=320'"></div>
+            <div class="founder-info"><h5>Subarna Kundu</h5><span class="founder-role">Co-Founder & Actor</span><p>Entrepreneur, homemaker, and mother — also a passionate theatre artist who has performed acclaimed plays, mimes, and pantomimes across Bengaluru and Kolkata.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERFORMANCES -->
+  <section id="performances" class="section-pad bg-cream">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <span class="section-label">On Stage</span>
+        <h2 class="section-title">Recent Performances</h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/VIDEO_ID_1" title="Dhanni Nobel Chor" allowfullscreen></iframe></div><div class="perf-info"><h5>Dhanni Nobel Chor</h5><p>A satirical Bengali play exploring human greed and moral hypocrisy through humour and symbolism.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Academy of Fine Arts, Kolkata · 29 Nov 2025</span></div></div></div>
+        <div class="col-md-6 col-lg-4"><div class="perf-card"><img src="images/performance1.jpg" alt="Rangamancha" onerror="this.src='https://placehold.co/600x338/1a1a2e/gold?text=Rangamancha'"><div class="perf-info"><h5>Rangamancha</h5><p>A dramatic retelling of backstage life — where art meets emotion, with overwhelming audience applause.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Tapan Theatre · July 2025</span></div></div></div>
+        <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/VIDEO_ID_2" title="Agnisikha" allowfullscreen></iframe></div><div class="perf-info"><h5>Agnisikha</h5><p>A powerful story of self-discovery and courage, showcasing the emotional depth of women through theatre and music.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Bengaluru</span></div></div></div>
+        <div class="col-md-6 col-lg-4"><div class="perf-card"><img src="images/performance2.jpg" alt="Moner Manush" onerror="this.src='https://placehold.co/600x338/1a1a2e/gold?text=Moner+Manush'"><div class="perf-info"><h5>Moner Manush</h5><p>A musical tribute inspired by Baul philosophy, blending soul, music, and theatre.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Bengaluru</span></div></div></div>
+        <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/VIDEO_ID_3" title="Jibon Jyoti" allowfullscreen></iframe></div><div class="perf-info"><h5>Jibon Jyoti</h5><p>A thought-provoking theatrical journey celebrating resilience and hope in modern society.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Bengaluru</span></div></div></div>
+        <div class="col-md-6 col-lg-4"><div class="perf-card"><img src="images/performance3.jpg" alt="Chhaya" onerror="this.src='https://placehold.co/600x338/1a1a2e/gold?text=Chhaya'"><div class="perf-info"><h5>Chhaya</h5><p>A poetic exploration of light and darkness — a visual treat that mesmerized audiences with its storytelling.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Bengaluru</span></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEEDBACK -->
+  <section id="feedback" class="section-pad bg-white">
+    <div class="container">
+      <div class="section-header text-center mb-4">
+        <span class="section-label">What Patrons Say</span>
+        <h2 class="section-title">Voices from the Audience</h2>
+      </div>
+      <div class="fbwall-layout" id="fbWallLayout">
+        <div class="fbwall-videos fbwall-videos-left" id="fbVideosLeft"><div class="fbwall-loading"><i class="bi bi-hourglass-split"></i> Loading...</div></div>
+        <div class="fbwall-postits" id="fbPostits"><div class="fbwall-loading"><i class="bi bi-hourglass-split"></i> Loading...</div></div>
+        <div class="fbwall-videos fbwall-videos-right" id="fbVideosRight"><div class="fbwall-loading"><i class="bi bi-hourglass-split"></i> Loading...</div></div>
+      </div>
+      <div class="text-center mt-2 mb-5"><div class="fb-wall-divider"></div></div>
+      <div class="section-header text-center mb-5">
+        <span class="section-label">Your Voice</span>
+        <h2 class="section-title">Share Your Feedback</h2>
+      </div>
+
+      <!-- Two-column layout with vertical divider -->
+      <div class="feedback-split">
+
+        <!-- LEFT: Written Feedback -->
+        <div class="fb-col fb-col-text">
+          <h6 class="fb-col-title"><i class="bi bi-chat-text-fill"></i> Written Feedback</h6>
+          <form id="feedbackForm" class="feedback-form" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Your Name</label><input type="text" class="form-control" name="fbname" placeholder="Rabindranath" required></div>
+              <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" name="fbemail" placeholder="you@example.com" required></div>
+              <div class="col-12"><label class="form-label">Performance / Event</label><input type="text" class="form-control" name="fbevent" placeholder="Which show did you attend?"></div>
+              <div class="col-12"><label class="form-label">Your Feedback</label><textarea class="form-control" name="fbmessage" rows="4" placeholder="We&rsquo;d love to hear your thoughts..." required></textarea></div>
+            </div>
+            <div class="mt-4"><button type="submit" class="btn btn-primary-custom px-5">Submit Feedback</button></div>
+          </form>
+        </div>
+
+        <!-- VERTICAL DIVIDER -->
+        <div class="fb-divider">
+          <span class="fb-divider-or">OR</span>
+        </div>
+
+        <!-- RIGHT: Video Feedback -->
+        <div class="fb-col fb-col-video">
+          <h6 class="fb-col-title"><i class="bi bi-camera-video-fill"></i> Video Feedback</h6>
+
+          <!-- The video screen with camera icon overlay -->
+          <div class="video-screen" id="videoScreen">
+            <div class="video-placeholder" id="videoPlaceholder">
+              <div class="video-icon-circle">
+                <i class="bi bi-camera-video-fill"></i>
+              </div>
+              <p class="mt-3 mb-0">Record your video feedback</p>
+              <small>Click the red button below to start</small>
+            </div>
+            <video id="videoPreview" autoplay muted playsinline class="d-none"></video>
+            <video id="videoPlayback" controls class="d-none"></video>
+            <div class="rec-indicator d-none" id="recIndicator">
+              <span class="rec-dot"></span>
+              <span id="recTimer">00:00</span>
+            </div>
+          </div>
+
+          <!-- Icon-only controls -->
+          <div class="video-icon-bar">
+            <button type="button" class="vid-icon-btn rec" id="btnRecord" onclick="startRecording()" title="Record">
+              <i class="bi bi-record-circle-fill"></i>
+            </button>
+            <button type="button" class="vid-icon-btn stop d-none" id="btnStop" onclick="stopRecording()" title="Stop">
+              <i class="bi bi-stop-circle-fill"></i>
+            </button>
+            <button type="button" class="vid-icon-btn retake d-none" id="btnRetake" onclick="retakeVideo()" title="Re-record">
+              <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+            <button type="button" class="vid-icon-btn send d-none" id="btnSend" onclick="sendVideo()" title="Post Video">
+              <i class="bi bi-send-fill"></i>
+            </button>
+          </div>
+
+          <div id="videoStatus" class="text-center small text-muted mt-2"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="section-pad bg-dark-stage">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <span class="section-label light">Get In Touch</span>
+        <h2 class="section-title light">Contact Us</h2>
+      </div>
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-4 text-center"><div class="contact-box"><i class="bi bi-geo-alt-fill"></i><h6>Location</h6><p>Bengaluru, Karnataka, India</p></div></div>
+        <div class="col-md-4 text-center"><div class="contact-box"><i class="bi bi-envelope-fill"></i><h6>Email</h6><p>ekalavyaperformingarts@gmail.com<br>picturewictureproductions@gmail.com</p></div></div>
+        <div class="col-md-4 text-center"><div class="contact-box"><i class="bi bi-telephone-fill"></i><h6>Phone</h6><p>+91 96867 06007</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container py-5">
+      <div class="row g-4">
+
+        <!-- EPA column -->
+        <div class="col-md-3">
+          <div class="d-flex align-items-center mb-3">
+            <img src="images/epa_logo.png" alt="EPA Logo" class="footer-logo me-2" onerror="this.style.display='none'">
+            <h5 class="text-white mb-0" style="font-family:'Permanent Marker',cursive;font-size:1.1rem;color:var(--crimson)!important;">Ekalavya Performing Arts</h5>
+          </div>
+          <p class="small" style="color:#aaa">Bengaluru-based theatre collective blending drama, music, and storytelling with purpose.</p>
+          <div class="d-flex gap-2 mt-3">
+            <a href="https://www.facebook.com/EKALAVYAPERFORMINGARTS" target="_blank" class="social-icon facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/ekalavyaperformingarts/" target="_blank" class="social-icon instagram"><i class="bi bi-instagram"></i></a>
+            <a href="https://www.youtube.com/@ekalavya-epa" target="_blank" class="social-icon youtube"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="col-md-2">
+          <h6 class="footer-head">Quick Links</h6>
+          <ul class="list-unstyled footer-links">
+            <li><a href="#home">Home</a></li><li><a href="#about">About Us</a></li>
+            <li><a href="#founder">EPA Founders</a></li><li><a href="#performances">Performances</a></li>
+            <li><a href="#feedback">Feedback</a></li><li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+
+        <!-- Departments -->
+        <div class="col-md-3">
+          <h6 class="footer-head">Departments</h6>
+          <ul class="list-unstyled footer-links">
+            <li>Production</li><li>Performance</li><li>Music</li>
+            <li>Outreach</li><li>Light</li><li>Creative Writing</li>
+          </ul>
+        </div>
+
+        <!-- Picture Wicture Productions -->
+        <div class="col-md-4">
+          <div class="d-flex align-items-center mb-2 gap-2">
+            <img src="images/pw_logo.png" alt="PWP Logo" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
+            <h6 class="footer-head mb-0"><span style="color:#FF6B00;">P</span>icture <span style="color:#1877F2;">W</span>icture <span style="color:#28a745;">P</span>roductions</h6>
+          </div>
+          <p class="small" style="color:#aaa">The cinematic wing of Ekalavya — producing short films, documentaries, and stage recordings.</p>
+          <div class="d-flex gap-2 mt-2">
+            <a href="https://www.facebook.com/PictureWictureProductions" target="_blank" class="social-icon facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/ekalavyaperformingarts/" target="_blank" class="social-icon instagram"><i class="bi bi-instagram"></i></a>
+            <a href="https://www.youtube.com/@PictureWictureProductions" target="_blank" class="social-icon youtube"><i class="bi bi-youtube"></i></a>
+          </div>
+          <div class="mt-3"><a href="admin.html" class="text-muted small"><i class="bi bi-shield-lock me-1"></i>Admin Panel</a></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Register as Member - centred at bottom -->
+    <div class="text-center py-3" style="border-top:1px solid rgba(255,255,255,0.07);">
+      <button class="btn btn-join" onclick="openRegistrationDirect()"><i class="bi bi-person-plus me-1"></i>Register as Member</button>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container d-flex flex-wrap justify-content-between align-items-center small">
+        <div><a href="#">Accessibility</a> <span>·</span> <a href="#">Terms</a> <span>·</span> <a href="#">Privacy</a></div>
+        <div style="color:#888">© 2026 Ekalavya Performing Arts &amp; Picture Wicture Productions | Designed by ABOSECO</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════
+       ADMIN LOGIN MODAL
+  ═══════════════════════════════════════════ -->
+  <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
+      <div class="modal-content login-modal">
+        <div class="modal-header login-header">
+          <div class="text-center w-100">
+            <div class="login-icon-wrap mb-2"><i class="bi bi-shield-lock"></i></div>
+            <h4 class="modal-title text-white fw-bold">Admin Access</h4>
+            <p class="text-white-50 small mb-0">Sign in to manage Ekalavya</p>
+          </div>
+          <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="adminLoginForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Username</label>
+              <div class="input-icon-wrap">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-control input-with-icon" id="adminLoginUser" placeholder="admin" autocomplete="username" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Password</label>
+              <div class="input-icon-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" class="form-control input-with-icon" id="adminLoginPass" placeholder="••••••••" autocomplete="current-password" required>
+                <button type="button" class="btn-eye" onclick="togglePwd('adminLoginPass', this)"><i class="bi bi-eye"></i></button>
+              </div>
+            </div>
+            <div id="adminLoginError" class="alert alert-danger d-none py-2 small"></div>
+            <button type="submit" class="btn btn-join w-100 py-2 mt-2" id="adminLoginBtn">
+              <span id="adminLoginBtnText"><i class="bi bi-shield-check me-1"></i>Sign In as Admin</span>
+              <span id="adminLoginBtnSpinner" class="d-none"><span class="spinner-border spinner-border-sm me-2"></span>Authenticating...</span>
+            </button>
+          </form>
+          <div class="text-center mt-3">
+            <small class="text-muted">Default: <code>admin</code> / <code>Ekalavya@2025</code></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MODAL 2: REGISTRATION (shown after login)
+  ═══════════════════════════════════════════ -->
+  <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content register-modal">
+        <div class="modal-header">
+          <div>
+            <h4 class="modal-title text-white"><i class="bi bi-person-plus-fill me-2"></i>Join Ekalavya Performing Arts</h4>
+            <p class="modal-subtitle" id="regWelcomeMsg">Fill in the form below to join Ekalavya Performing Arts</p>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="registrationForm" novalidate>
+
+            <h6 class="form-section-title"><i class="bi bi-person me-2"></i>Personal Information</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6"><label class="form-label">Full Name (Block Letters) <span class="text-danger">*</span></label><input type="text" class="form-control" name="name" placeholder="ABIR BOSE" required></div>
+              <div class="col-md-6"><label class="form-label">Parent's / Guardian's Name <span class="text-danger">*</span></label><input type="text" class="form-control" name="parent_name" required></div>
+              <div class="col-md-6"><label class="form-label">Phone Number <span class="text-danger">*</span></label><input type="tel" class="form-control" name="phone" placeholder="9686706007" required></div>
+              <div class="col-md-6"><label class="form-label">Email ID <span class="text-danger">*</span></label><input type="email" class="form-control" name="email" placeholder="you@example.com" required></div>
+              <div class="col-md-4"><label class="form-label">Age <span class="text-danger">*</span></label><input type="number" class="form-control" name="age" min="5" max="100" required></div>
+              <div class="col-md-4"><label class="form-label">Date of Birth <span class="text-danger">*</span></label><input type="date" class="form-control" name="dob" required></div>
+              <div class="col-md-4"><label class="form-label">Aadhar Card No</label><input type="text" class="form-control" name="aadhar" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
+              <div class="col-md-6">
+                <label class="form-label">Occupation <span class="text-danger">*</span></label>
+                <select class="form-select" name="occupation" required>
+                  <option value="">Select...</option>
+                  <option>Student</option><option>Working Professional</option>
+                  <option>Self Employed</option><option>Homemaker</option><option>Other</option>
+                </select>
+              </div>
+              <div class="col-md-6"><label class="form-label">School / College / Organization</label><input type="text" class="form-control" name="organization" placeholder="VTU, IIMB, etc."></div>
+              <div class="col-12"><label class="form-label">Current Address <span class="text-danger">*</span></label><textarea class="form-control" name="current_address" rows="2" required></textarea></div>
+              <div class="col-12"><label class="form-label">Permanent Address</label><textarea class="form-control" name="permanent_address" rows="2"></textarea></div>
+            </div>
+
+            <h6 class="form-section-title"><i class="bi bi-star me-2"></i>Areas of Interest</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_acting" name="interests" value="Acting" autocomplete="off"><label class="btn interest-label w-100" for="i_acting"><i class="bi bi-masks-theater me-1"></i>Acting</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_dance" name="interests" value="Dance" autocomplete="off"><label class="btn interest-label w-100" for="i_dance"><i class="bi bi-person-arms-up me-1"></i>Dance</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_music" name="interests" value="Music" autocomplete="off"><label class="btn interest-label w-100" for="i_music"><i class="bi bi-music-note-beamed me-1"></i>Music</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_song" name="interests" value="Song" autocomplete="off"><label class="btn interest-label w-100" for="i_song"><i class="bi bi-mic me-1"></i>Song</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_recitation" name="interests" value="Recitation" autocomplete="off"><label class="btn interest-label w-100" for="i_recitation"><i class="bi bi-journal-text me-1"></i>Recitation</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_anchoring" name="interests" value="Anchoring" autocomplete="off"><label class="btn interest-label w-100" for="i_anchoring"><i class="bi bi-megaphone me-1"></i>Anchoring</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_direction" name="interests" value="Direction" autocomplete="off"><label class="btn interest-label w-100" for="i_direction"><i class="bi bi-camera-video me-1"></i>Direction</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_writing" name="interests" value="Creative Writing" autocomplete="off"><label class="btn interest-label w-100" for="i_writing"><i class="bi bi-pen me-1"></i>Creative Writing</label></div>
+              <div class="col-6 col-md-4"><input type="checkbox" class="btn-check" id="i_cinema" name="interests" value="Cinematography" autocomplete="off"><label class="btn interest-label w-100" for="i_cinema"><i class="bi bi-film me-1"></i>Cinematography</label></div>
+            </div>
+
+            <h6 class="form-section-title"><i class="bi bi-bar-chart me-2"></i>Rate Yourself (1 = Beginner · 10 = Expert)</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6"><label class="form-label">Acting</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_acting" min="1" max="10" value="5" oninput="updateRating(this,'rActing')"><span id="rActing" class="rating-badge">5</span></div></div>
+              <div class="col-md-6"><label class="form-label">Dance</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_dance" min="1" max="10" value="5" oninput="updateRating(this,'rDance')"><span id="rDance" class="rating-badge">5</span></div></div>
+              <div class="col-md-6"><label class="form-label">Music</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_music" min="1" max="10" value="5" oninput="updateRating(this,'rMusic')"><span id="rMusic" class="rating-badge">5</span></div></div>
+              <div class="col-md-6"><label class="form-label">Song / Vocal</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_song" min="1" max="10" value="5" oninput="updateRating(this,'rSong')"><span id="rSong" class="rating-badge">5</span></div></div>
+              <div class="col-md-6"><label class="form-label">Recitation</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_recitation" min="1" max="10" value="5" oninput="updateRating(this,'rRecitation')"><span id="rRecitation" class="rating-badge">5</span></div></div>
+              <div class="col-md-6"><label class="form-label">Anchoring</label><div class="d-flex align-items-center gap-2"><input type="range" class="form-range" name="rating_anchoring" min="1" max="10" value="5" oninput="updateRating(this,'rAnchoring')"><span id="rAnchoring" class="rating-badge">5</span></div></div>
+            </div>
+
+            <h6 class="form-section-title"><i class="bi bi-chat-heart me-2"></i>Why Ekalavya?</h6>
+            <textarea class="form-control" name="motivation" rows="3" placeholder="Why do you want to be part of Ekalavya? What do you hope to contribute or learn?"></textarea>
+
+            <div id="formAlert" class="alert d-none mt-3"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-join" id="submitRegistration">
+            <span id="submitText"><i class="bi bi-send me-1"></i>Submit Registration</span>
+            <span id="submitSpinner" class="d-none"><span class="spinner-border spinner-border-sm me-2"></span>Submitting...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
