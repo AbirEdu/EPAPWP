@@ -234,7 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
 }); // end DOMContentLoaded
 
 // ── Inline helpers ──
-window.updateRating = (slider, id) => { const el = document.getElementById(id); if (el) el.textContent = slider.value; };
+window.updateRating = (slider, id) => {
+  const el = document.getElementById(id);
+  if (el) el.textContent = slider.value;
+  const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+  slider.style.setProperty('--val', `${pct}%`);
+};
 window.togglePwd = (inputId, btn) => {
   const input = document.getElementById(inputId);
   if (!input) return;
