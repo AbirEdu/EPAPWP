@@ -1,0 +1,8 @@
+# Replace ekalavyaperformingarts.com below with your real domain once you've
+# registered and pointed it at this server's IP. Caddy automatically gets and
+# renews a free HTTPS certificate for whatever domain is listed here — no
+# manual certbot steps needed.
+
+ekalavyaperformingarts.com, www.ekalavyaperformingarts.com {
+    reverse_proxy frontend:80
+}

@@ -1,0 +1,72 @@
+# Production compose file — run this on the server instead of docker-compose.yml.
+# Adds Caddy in front for automatic free HTTPS, and stops exposing the API's
+# port 8000 directly to the internet (nginx already proxies /api/ to it
+# internally — there's no reason for it to be reachable on its own).
+#
+# Usage on the server:
+#   docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+
+  # ──────────────────────────
+  # FastAPI Backend (no public port — reached via nginx's /api/ proxy only)
+  # ──────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ekalavya_api
+    restart: unless-stopped
+    environment:
+      MONGO_URL: "${MONGO_URL:?Set MONGO_URL in .env to your MongoDB Atlas connection string}"
+      DB_NAME: "${DB_NAME:-ekalavya}"
+      JWT_SECRET: "${JWT_SECRET:?Set JWT_SECRET in .env, generate with openssl rand -hex 32}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      YOUTUBE_CLIENT_ID: "${YOUTUBE_CLIENT_ID:-}"
+      YOUTUBE_CLIENT_SECRET: "${YOUTUBE_CLIENT_SECRET:-}"
+      YOUTUBE_REFRESH_TOKEN: "${YOUTUBE_REFRESH_TOKEN:-}"
+    networks:
+      - ekalavya_net
+
+  # ──────────────────────────
+  # Frontend (nginx static + API proxy) — internal only, Caddy fronts it
+  # ──────────────────────────
+  frontend:
+    image: nginx:alpine
+    container_name: ekalavya_frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+    networks:
+      - ekalavya_net
+
+  # ──────────────────────────
+  # Caddy — TLS termination + automatic Let's Encrypt certs
+  # ──────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: ekalavya_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+    networks:
+      - ekalavya_net
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  ekalavya_net:
+    driver: bridge
