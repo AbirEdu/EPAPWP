@@ -61,13 +61,6 @@ async function doLogin(username, password) {
   } catch (err) {
     errBox.textContent = err.message;
     errBox.classList.remove('d-none');
-    // Demo fallback for testing without backend
-    if (username === 'admin' && password === 'Ekalavya@2025') {
-      const fakeUser = { username: 'admin', full_name: 'Ekalavya Admin', role: 'super_admin', access_token: 'demo' };
-      sessionStorage.setItem('eka_admin_token', 'demo');
-      currentUser = fakeUser;
-      enterDashboard(fakeUser);
-    }
   }
 
   text.classList.remove('d-none'); spinner.classList.add('d-none');
@@ -75,11 +68,6 @@ async function doLogin(username, password) {
 }
 
 async function verifyAndEnter(token) {
-  if (token === 'demo') {
-    currentUser = { username: 'admin', full_name: 'Ekalavya Admin', role: 'super_admin' };
-    enterDashboard(currentUser);
-    return;
-  }
   try {
     const res = await fetch(`${API}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -159,7 +147,7 @@ function showTab(tab, el) {
   document.getElementById('topbarTitle').textContent = titles[tab] || tab;
 
   if (tab === 'members')  loadMembers();
-  if (tab === 'feedback') loadFeedback();
+  if (tab === 'feedback') { loadFeedback(); loadVideoFeedback(); }
   if (tab === 'users')    loadUsers();
 }
 
@@ -313,13 +301,72 @@ async function loadFeedback() {
             <div class="feedback-item-name">${f.name}</div>
             <div class="feedback-item-event">${f.event || 'General Feedback'}</div>
           </div>
-          <div class="feedback-item-date">${f.created_at ? new Date(f.created_at).toLocaleDateString('en-IN') : ''}</div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-status badge-${f.status || 'pending'}">${f.status || 'pending'}</span>
+            <div class="feedback-item-date">${f.created_at ? new Date(f.created_at).toLocaleDateString('en-IN') : ''}</div>
+          </div>
         </div>
         <div class="feedback-item-message">"${f.message}"</div>
         <div style="font-size:0.78rem;color:#aaa;margin-top:6px">${f.email}</div>
+        <div class="d-flex gap-1 mt-2">
+          ${f.status !== 'approved' ? `<button class="btn-sm-action btn-approve" onclick="setFeedbackStatus('${f.id}','approved',this)">Approve</button>` : ''}
+          ${f.status !== 'rejected' ? `<button class="btn-sm-action btn-inactive" onclick="setFeedbackStatus('${f.id}','rejected',this)">Reject</button>` : ''}
+        </div>
       </div>`).join('') : '<p class="text-muted text-center py-4">No feedback yet.</p>';
   } catch (err) {
     el.innerHTML = `<p class="text-danger">${err.message}</p>`;
+  }
+}
+
+async function setFeedbackStatus(id, status, btn) {
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await apiPatch(`/feedback/${id}/status?status=${status}`);
+    showToast(`Feedback ${status}`, 'success');
+    loadFeedback();
+  } catch (err) {
+    showToast(err.message, 'danger');
+    btn.disabled = false;
+  }
+}
+
+// ─── VIDEO FEEDBACK ───
+async function loadVideoFeedback() {
+  const el = document.getElementById('videoFeedbackList');
+  el.innerHTML = '<div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>';
+  try {
+    const items = await apiGet('/feedback/video?limit=50');
+    el.innerHTML = items.length ? items.map(f => `
+      <div class="feedback-item">
+        <div class="feedback-item-header">
+          <div class="feedback-item-name">${f.name}</div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-status badge-${f.status || 'pending'}">${f.status || 'pending'}</span>
+            <div class="feedback-item-date">${f.created_at ? new Date(f.created_at).toLocaleDateString('en-IN') : ''}</div>
+          </div>
+        </div>
+        <div class="ratio ratio-16x9 mt-2" style="max-width:360px;">
+          <iframe src="https://www.youtube.com/embed/${f.youtube_video_id}" title="${f.name}" allowfullscreen></iframe>
+        </div>
+        <div class="d-flex gap-1 mt-2">
+          ${f.status !== 'approved' ? `<button class="btn-sm-action btn-approve" onclick="setVideoFeedbackStatus('${f.id}','approved',this)">Approve</button>` : ''}
+          ${f.status !== 'rejected' ? `<button class="btn-sm-action btn-inactive" onclick="setVideoFeedbackStatus('${f.id}','rejected',this)">Reject</button>` : ''}
+        </div>
+      </div>`).join('') : '<p class="text-muted text-center py-4">No video feedback yet.</p>';
+  } catch (err) {
+    el.innerHTML = `<p class="text-danger">${err.message}</p>`;
+  }
+}
+
+async function setVideoFeedbackStatus(id, status, btn) {
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await apiPatch(`/feedback/video/${id}/status?status=${status}`);
+    showToast(`Video feedback ${status}`, 'success');
+    loadVideoFeedback();
+  } catch (err) {
+    showToast(err.message, 'danger');
+    btn.disabled = false;
   }
 }
 

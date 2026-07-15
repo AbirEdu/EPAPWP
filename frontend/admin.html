@@ -136,13 +136,22 @@
 
       <!-- FEEDBACK TAB -->
       <div id="tab-feedback" class="tab-pane d-none">
-        <div class="admin-card">
+        <div class="admin-card mb-4">
           <div class="admin-card-header">
-            <h6>Member Feedback</h6>
+            <h6>Written Feedback</h6>
             <button class="btn btn-sm btn-crimson" onclick="loadFeedback()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
           </div>
           <div class="admin-card-body">
             <div id="feedbackList" class="feedback-admin-list">Loading...</div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h6>Video Feedback</h6>
+            <button class="btn btn-sm btn-crimson" onclick="loadVideoFeedback()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+          </div>
+          <div class="admin-card-body">
+            <div id="videoFeedbackList" class="feedback-admin-list">Loading...</div>
           </div>
         </div>
       </div>

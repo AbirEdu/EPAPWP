@@ -1,24 +1,26 @@
-from fastapi import FastAPI, HTTPException, Query, Depends, status
+from fastapi import FastAPI, HTTPException, Query, Depends, status, Form, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from datetime import datetime, timedelta
 from typing import Optional, List
-import os, jwt, bcrypt
+import asyncio, os, jwt, bcrypt
 
 from app.models import (
     MemberRegistration, MemberRegistrationOut,
-    FeedbackCreate, FeedbackOut,
+    FeedbackCreate, FeedbackOut, FeedbackPublicOut,
+    VideoFeedbackOut, VideoFeedbackPublicOut,
     LoginRequest, TokenResponse, UserCreate, UserOut,
 )
+from app import youtube as yt
 
 app = FastAPI(title="Ekalavya Performing Arts API", version="2.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-MONGO_URL  = os.getenv("MONGO_URL",  "mongodb://mongo:27017")
-DB_NAME    = os.getenv("DB_NAME",    "ekalavya")
-JWT_SECRET = os.getenv("JWT_SECRET", "ekalavya_jwt_secret_change_in_prod")
+MONGO_URL  = os.environ["MONGO_URL"]   # MongoDB Atlas connection string, no local fallback
+DB_NAME    = os.getenv("DB_NAME", "ekalavya")
+JWT_SECRET = os.environ["JWT_SECRET"]  # no insecure default — must be set explicitly
 JWT_ALGO   = "HS256"
 JWT_EXPIRE = 60 * 8
 
@@ -54,14 +56,23 @@ async def startup():
     await db.members.create_index("status")
     await db.users.create_index("username", unique=True)
     await db.feedback.create_index("created_at")
-    if not await db.users.find_one({"username": "admin"}):
-        hashed = bcrypt.hashpw(b"Ekalavya@2025", bcrypt.gensalt()).decode()
-        await db.users.insert_one({
-            "username": "admin", "password": hashed,
-            "role": "super_admin", "full_name": "Ekalavya Admin",
-            "created_at": datetime.utcnow(), "active": True,
-        })
-        print("Default admin: username=admin  password=Ekalavya@2025")
+    await db.feedback.create_index("status")
+    await db.video_feedback.create_index("created_at")
+    await db.video_feedback.create_index("status")
+    if not await db.users.find_one({}):
+        admin_username = os.getenv("ADMIN_USERNAME")
+        admin_password = os.getenv("ADMIN_PASSWORD")
+        if not admin_username or not admin_password:
+            print("No admin user exists yet, and ADMIN_USERNAME/ADMIN_PASSWORD are not set. "
+                  "Set them in .env and restart to create the first admin account.")
+        else:
+            hashed = bcrypt.hashpw(admin_password.encode(), bcrypt.gensalt()).decode()
+            await db.users.insert_one({
+                "username": admin_username, "password": hashed,
+                "role": "super_admin", "full_name": "Administrator",
+                "created_at": datetime.utcnow(), "active": True,
+            })
+            print(f"Created initial admin user: {admin_username}")
 
 @app.on_event("shutdown")
 async def shutdown(): app.state.mongo.close()
@@ -127,13 +138,12 @@ async def change_password(username: str, new_password: str, admin=Depends(requir
 
 # MEMBERS
 @app.post("/register", response_model=MemberRegistrationOut, tags=["members"], status_code=201)
-async def register_member(payload: MemberRegistration, user=Depends(get_current_user)):
+async def register_member(payload: MemberRegistration):
     if await app.state.db.members.find_one({"email": payload.email}):
         raise HTTPException(400, "A member with this email is already registered.")
     doc = payload.dict()
     doc["created_at"] = datetime.utcnow()
     doc["status"] = "pending"
-    doc["registered_by"] = user["sub"]
     result = await app.state.db.members.insert_one(doc)
     created = await app.state.db.members.find_one({"_id": result.inserted_id})
     return _serialize(created)
@@ -168,17 +178,95 @@ async def update_status(member_id: str, status: str, admin=Depends(require_admin
     return {"message": f"Status → {status}"}
 
 # FEEDBACK
+VALID_FEEDBACK_STATUSES = {"pending", "approved", "rejected"}
+
 @app.post("/feedback", response_model=FeedbackOut, tags=["feedback"], status_code=201)
 async def submit_feedback(payload: FeedbackCreate):
     doc = payload.dict()
     doc["created_at"] = datetime.utcnow()
+    doc["status"] = "pending"
     result = await app.state.db.feedback.insert_one(doc)
     return _serialize(await app.state.db.feedback.find_one({"_id": result.inserted_id}))
 
-@app.get("/feedback", response_model=List[FeedbackOut], tags=["feedback"])
-async def list_feedback(skip:int=0, limit:int=Query(default=20,le=100), admin=Depends(require_admin)):
-    cursor = app.state.db.feedback.find().skip(skip).limit(limit).sort("created_at",-1)
+@app.get("/feedback/approved", response_model=List[FeedbackPublicOut], tags=["feedback"])
+async def list_approved_feedback(limit: int = Query(default=10, le=50)):
+    cursor = app.state.db.feedback.find({"status": "approved"}).sort("created_at", -1).limit(limit)
     return [_serialize(i) for i in await cursor.to_list(length=limit)]
+
+@app.get("/feedback", response_model=List[FeedbackOut], tags=["feedback"])
+async def list_feedback(skip:int=0, limit:int=Query(default=20,le=100), status: Optional[str]=None, admin=Depends(require_admin)):
+    query = {}
+    if status: query["status"] = status
+    cursor = app.state.db.feedback.find(query).skip(skip).limit(limit).sort("created_at",-1)
+    return [_serialize(i) for i in await cursor.to_list(length=limit)]
+
+@app.patch("/feedback/{feedback_id}/status", tags=["feedback"])
+async def update_feedback_status(feedback_id: str, status: str, admin=Depends(require_admin)):
+    if status not in VALID_FEEDBACK_STATUSES:
+        raise HTTPException(400, "Invalid status")
+    try: oid = ObjectId(feedback_id)
+    except: raise HTTPException(400, "Invalid ID")
+    r = await app.state.db.feedback.update_one({"_id": oid}, {"$set": {"status": status}})
+    if r.matched_count == 0: raise HTTPException(404, "Not found")
+    return {"message": f"Status → {status}"}
+
+# VIDEO FEEDBACK
+VALID_VIDEO_STATUSES = {"pending", "approved", "rejected"}
+MAX_VIDEO_BYTES = 100 * 1024 * 1024  # 100MB
+
+@app.post("/feedback/video", response_model=VideoFeedbackOut, tags=["feedback"], status_code=201)
+async def submit_video_feedback(
+    name: str = Form(..., min_length=2, max_length=120),
+    duration: int = Form(0),
+    video: UploadFile = File(...),
+):
+    if not yt.is_configured():
+        raise HTTPException(503, "Video feedback isn't available right now. Please try written feedback instead.")
+    contents = await video.read()
+    if len(contents) > MAX_VIDEO_BYTES:
+        raise HTTPException(400, "Video file is too large (max 100MB).")
+
+    try:
+        video_id = await asyncio.to_thread(
+            yt.upload_video, contents,
+            f"EPA Feedback — {name}",
+            f"Video feedback submitted by {name} via the Ekalavya Performing Arts website.",
+        )
+    except Exception as e:
+        raise HTTPException(502, f"Video upload failed: {e}")
+
+    doc = {
+        "name": name,
+        "youtube_video_id": video_id,
+        "duration": duration,
+        "status": "pending",
+        "created_at": datetime.utcnow(),
+    }
+    result = await app.state.db.video_feedback.insert_one(doc)
+    created = await app.state.db.video_feedback.find_one({"_id": result.inserted_id})
+    return _serialize(created)
+
+@app.get("/feedback/video/approved", response_model=List[VideoFeedbackPublicOut], tags=["feedback"])
+async def list_approved_video_feedback(limit: int = Query(default=12, le=50)):
+    cursor = app.state.db.video_feedback.find({"status": "approved"}).sort("created_at", -1).limit(limit)
+    return [_serialize(i) for i in await cursor.to_list(length=limit)]
+
+@app.get("/feedback/video", response_model=List[VideoFeedbackOut], tags=["feedback"])
+async def list_video_feedback(skip:int=0, limit:int=Query(default=20,le=100), status: Optional[str]=None, admin=Depends(require_admin)):
+    query = {}
+    if status: query["status"] = status
+    cursor = app.state.db.video_feedback.find(query).skip(skip).limit(limit).sort("created_at",-1)
+    return [_serialize(i) for i in await cursor.to_list(length=limit)]
+
+@app.patch("/feedback/video/{video_id}/status", tags=["feedback"])
+async def update_video_feedback_status(video_id: str, status: str, admin=Depends(require_admin)):
+    if status not in VALID_VIDEO_STATUSES:
+        raise HTTPException(400, "Invalid status")
+    try: oid = ObjectId(video_id)
+    except: raise HTTPException(400, "Invalid ID")
+    r = await app.state.db.video_feedback.update_one({"_id": oid}, {"$set": {"status": status}})
+    if r.matched_count == 0: raise HTTPException(404, "Not found")
+    return {"message": f"Status → {status}"}
 
 # STATS
 @app.get("/stats", tags=["stats"])

@@ -34,7 +34,7 @@ ekalavya/
 │       └── models.py       # Pydantic + MongoDB schemas
 ├── docker-compose.yml      # Full stack orchestration
 ├── nginx.conf              # Nginx reverse proxy config
-└── mongo-init.js           # MongoDB init script
+└── .env.example            # Copy to .env and fill in Atlas connection string + JWT secret
 ```
 
 ---
@@ -48,6 +48,7 @@ ekalavya/
 ```bash
 git clone <your-repo>
 cd ekalavya
+cp .env.example .env    # fill in your MongoDB Atlas connection string + JWT_SECRET
 docker compose up --build
 ```
 
@@ -55,7 +56,8 @@ docker compose up --build
 |---------------|------------------------------|
 | Website       | http://localhost             |
 | API docs      | http://localhost:8000/docs   |
-| Mongo Express | http://localhost:8081 (admin/admin123) |
+
+Database is MongoDB Atlas (cloud-hosted) — there's no local Mongo container or Mongo Express admin UI anymore. Use the Atlas dashboard to browse/manage data instead.
 
 ---
 
@@ -136,11 +138,17 @@ If images are missing, the site uses tasteful fallbacks (placeholder colors + in
 
 ## Environment Variables
 
-Create a `.env` file in the project root if needed:
+Copy `.env.example` to `.env` and fill in real values (`MONGO_URL`/`JWT_SECRET` are required — the app won't start without them):
 ```env
-MONGO_URL=mongodb://ekalavya_admin:ekalavya_pass@mongo:27017/ekalavya?authSource=admin
+MONGO_URL=mongodb+srv://<db-username>:<db-password>@<cluster-name>.mongodb.net/ekalavya?retryWrites=true&w=majority
 DB_NAME=ekalavya
+JWT_SECRET=<generate with: openssl rand -hex 32>
+
+# Only used once, to create the first admin login if none exists yet:
+ADMIN_USERNAME=<pick a real username>
+ADMIN_PASSWORD=<pick a strong password>
 ```
+Get the connection string from your MongoDB Atlas dashboard: **Database → Connect → Drivers**. After the first admin account is created, manage additional admin/volunteer accounts from the admin panel's Users tab instead of editing these env vars again.
 
 ---
 
@@ -150,6 +158,7 @@ DB_NAME=ekalavya
 # Backend
 cd backend
 pip install -r requirements.txt
+export MONGO_URL=... JWT_SECRET=...   # same values as your .env
 uvicorn app.main:app --reload --port 8000
 
 # Frontend - just open frontend/index.html in browser
@@ -161,7 +170,7 @@ uvicorn app.main:app --reload --port 8000
 ## Tech Stack
 - **Frontend**: HTML5, Bootstrap 5, Vanilla JS
 - **Backend**: Python 3.11, FastAPI, Motor (async MongoDB driver)
-- **Database**: MongoDB 7.0
+- **Database**: MongoDB Atlas (cloud-hosted)
 - **Proxy**: Nginx Alpine
 - **Containers**: Docker + Docker Compose
 

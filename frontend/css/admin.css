@@ -245,6 +245,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f4f5f7; color: #1a1a1a; 
 .badge-approved { background: #d1fae5; color: #065f46; }
 .badge-active   { background: #dbeafe; color: #1e3a8a; }
 .badge-inactive { background: #f1f5f9; color: #64748b; }
+.badge-rejected { background: #fee2e2; color: #991b1b; }
 
 /* Interest tags */
 .interest-tag {

@@ -84,9 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     errBox.classList.add('d-none');
 
     let ok = false;
-    let verified = false;
 
-    // Try real API
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -94,16 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
-      if (res.ok) { ok = true; verified = true; }
-      else throw new Error(data.detail || 'Invalid credentials');
-    } catch {
-      // Demo / offline fallback
-      if (username === 'admin' && password === 'Ekalavya@2025') {
+      if (res.ok) {
         ok = true;
       } else {
-        errBox.textContent = 'Invalid credentials. (Default: admin / Ekalavya@2025)';
+        errBox.textContent = data.detail || 'Invalid credentials.';
         errBox.classList.remove('d-none');
       }
+    } catch {
+      errBox.textContent = 'Could not reach the server. Please try again.';
+      errBox.classList.remove('d-none');
     }
 
     if (ok) {
@@ -168,26 +165,38 @@ document.addEventListener('DOMContentLoaded', () => {
       motivation: form.motivation.value || undefined,
     };
 
-    // Try API, succeed either way in demo mode
+    let ok = false;
+    let errMsg = 'Something went wrong submitting your registration. Please try again in a moment.';
     try {
-      const token = sessionStorage.getItem('eka_admin_token') || 'public';
-      await fetch(`${API_BASE}/register`, {
+      const res = await fetch(`${API_BASE}/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-    } catch { /* offline — show success */ }
+      if (res.ok) {
+        ok = true;
+      } else {
+        const data = await res.json().catch(() => ({}));
+        errMsg = data.detail || errMsg;
+      }
+    } catch { /* network error — errMsg stays as generic fallback */ }
 
-    alertEl.className = 'alert alert-success';
-    alertEl.innerHTML = `🎉 Thank you, <strong>${payload.name}</strong>! Your registration is received. We'll reach out at <strong>${payload.email}</strong>.`;
-    alertEl.classList.remove('d-none');
-    form.reset();
-    document.querySelectorAll('.rating-badge').forEach(b => b.textContent = '5');
+    if (ok) {
+      alertEl.className = 'alert alert-success';
+      alertEl.innerHTML = `🎉 Your request for joining is successfully submitted. EPA PWP team will get back to you in the next business day.`;
+      alertEl.classList.remove('d-none');
+      form.reset();
+      document.querySelectorAll('.rating-badge').forEach(b => b.textContent = '5');
 
-    setTimeout(() => {
-      closeModal('registerModal');
-      showToast('Registration submitted! Welcome to Ekalavya 🎭', 'success');
-    }, 2800);
+      setTimeout(() => {
+        closeModal('registerModal');
+        showToast('Request submitted! EPA PWP team will get back to you in the next business day 🎭', 'success');
+      }, 2800);
+    } else {
+      alertEl.className = 'alert alert-danger';
+      alertEl.textContent = errMsg;
+      alertEl.classList.remove('d-none');
+    }
 
     btnText.classList.remove('d-none');
     btnSpin.classList.add('d-none');
@@ -268,45 +277,32 @@ let recordTimer = null;
 let recordSeconds = 0;
 const MAX_SECONDS = 120; // 2-minute limit
 
-// Switch tab between text / video
-window.switchFbTab = function (btn) {
-  const target = btn.dataset.tab;
-  document.querySelectorAll('.fb-tab').forEach(t => t.classList.toggle('active', t === btn));
-  document.querySelectorAll('.fb-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
-  // If switching away from video, kill any active recording
-  if (target !== 'video' && stream) { cleanupStream(); resetVideoUI(); }
-};
-
 window.startRecording = async function () {
   const status = document.getElementById('videoStatus');
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
   } catch (err) {
-    status.innerHTML = '<span class="text-danger">⚠️ Camera/microphone access denied. Please allow access in your browser settings.</span>';
+    status.innerHTML = '<span class="text-danger">\u26a0\ufe0f Camera/microphone access denied. Please allow access in your browser settings.</span>';
     return;
   }
 
-  // Setup live preview
   const preview = document.getElementById('videoPreview');
   document.getElementById('videoPlaceholder').classList.add('d-none');
   document.getElementById('videoPlayback').classList.add('d-none');
   preview.classList.remove('d-none');
   preview.srcObject = stream;
 
-  // Setup recorder
   recordedChunks = [];
   mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
   mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
   mediaRecorder.onstop = handleRecordingStop;
   mediaRecorder.start();
 
-  // Show stop button, hide record
   document.getElementById('btnRecord').classList.add('d-none');
   document.getElementById('btnStop').classList.remove('d-none');
   document.getElementById('btnRetake').classList.add('d-none');
   document.getElementById('btnSend').classList.add('d-none');
 
-  // Show timer
   document.getElementById('recIndicator').classList.remove('d-none');
   recordSeconds = 0;
   updateTimer();
@@ -316,13 +312,11 @@ window.startRecording = async function () {
     if (recordSeconds >= MAX_SECONDS) stopRecording();
   }, 1000);
 
-  status.textContent = '🔴 Recording...';
+  status.textContent = '\ud83d\udd34 Recording...';
 };
 
 window.stopRecording = function () {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-  }
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
   if (recordTimer) { clearInterval(recordTimer); recordTimer = null; }
   document.getElementById('recIndicator').classList.add('d-none');
 };
@@ -338,17 +332,14 @@ function handleRecordingStop() {
   playback.src = url;
   playback.classList.remove('d-none');
 
-  // Stop the camera
   cleanupStream();
 
-  // Show retake + send
   document.getElementById('btnRecord').classList.add('d-none');
   document.getElementById('btnStop').classList.add('d-none');
   document.getElementById('btnRetake').classList.remove('d-none');
   document.getElementById('btnSend').classList.remove('d-none');
 
-  const seconds = recordSeconds;
-  document.getElementById('videoStatus').innerHTML = `✅ Recorded ${formatTime(seconds)} of video. Preview above, then click <strong>Send Feedback</strong>.`;
+  document.getElementById('videoStatus').innerHTML = `\u2705 Recorded ${formatTime(recordSeconds)}. Preview above, then click <strong>send</strong> to post.`;
 }
 
 window.retakeVideo = function () {
@@ -357,13 +348,11 @@ window.retakeVideo = function () {
 };
 
 window.sendVideo = async function () {
-  const name  = document.getElementById('vbName').value.trim();
-  const email = document.getElementById('vbEmail').value.trim();
-  const event = document.getElementById('vbEvent').value.trim();
+  const name = document.getElementById('vbName').value.trim();
   const status = document.getElementById('videoStatus');
 
-  if (!name || !email) {
-    status.innerHTML = '<span class="text-danger">Please fill in your name and email above.</span>';
+  if (!name) {
+    status.innerHTML = '<span class="text-danger">Please enter your name above.</span>';
     return;
   }
   if (!recordedBlob) {
@@ -373,13 +362,10 @@ window.sendVideo = async function () {
 
   const btn = document.getElementById('btnSend');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-  // Build form data with the video blob
   const formData = new FormData();
   formData.append('name', name);
-  formData.append('email', email);
-  formData.append('event', event || 'Video Feedback');
   formData.append('video', recordedBlob, `feedback_${Date.now()}.webm`);
   formData.append('duration', recordSeconds);
 
@@ -388,19 +374,21 @@ window.sendVideo = async function () {
       method: 'POST',
       body: formData,
     });
-    if (!res.ok) throw new Error();
+    if (res.ok) {
+      showToast('\ud83c\udfac Video feedback sent! Thank you \ud83d\ude4f', 'success');
+      resetVideoUI();
+      document.getElementById('vbName').value = '';
+      status.innerHTML = '<span class="text-success">\u2705 Sent successfully! It will appear on the site once approved.</span>';
+    } else {
+      const data = await res.json().catch(() => ({}));
+      status.innerHTML = `<span class="text-danger">${data.detail || 'Something went wrong sending your video. Please try again.'}</span>`;
+    }
   } catch {
-    // Demo / offline — show success anyway
+    status.innerHTML = '<span class="text-danger">Could not reach the server. Please try again.</span>';
   }
 
-  showToast('🎬 Video feedback sent! Thank you 🙏', 'success');
-  resetVideoUI();
-  document.getElementById('vbName').value = '';
-  document.getElementById('vbEmail').value = '';
-  document.getElementById('vbEvent').value = '';
-  status.innerHTML = '<span class="text-success">✅ Sent successfully!</span>';
   btn.disabled = false;
-  btn.innerHTML = '<i class="bi bi-send-fill"></i> Send Feedback';
+  btn.innerHTML = '<i class="bi bi-send-fill"></i>';
 };
 
 function resetVideoUI() {
@@ -434,165 +422,12 @@ function getSupportedMimeType() {
 }
 
 function updateTimer() {
-  document.getElementById('recTimer').textContent = formatTime(recordSeconds);
+  const el = document.getElementById('recTimer');
+  if (el) el.textContent = formatTime(recordSeconds);
 }
 function formatTime(s) {
-  const m = String(Math.floor(s/60)).padStart(2,'0');
-  const sec = String(s%60).padStart(2,'0');
-  return `${m}:${sec}`;
+  return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
 }
-// ══════════════════════════════════════════
-// VIDEO FEEDBACK RECORDER
-// Append this to your script.js
-// ══════════════════════════════════════════
-(function () {
-  let mediaRecorder = null;
-  let recordedChunks = [];
-  let recordedBlob = null;
-  let stream = null;
-  let recordTimer = null;
-  let recordSeconds = 0;
-  const MAX_SECONDS = 120; // 2-minute limit
-
-  window.startRecording = async function () {
-    const status = document.getElementById('videoStatus');
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    } catch (err) {
-      status.innerHTML = '<span style="color:#b91c1c">⚠️ Camera/mic access denied. Allow access in browser settings.</span>';
-      return;
-    }
-
-    const preview = document.getElementById('videoPreview');
-    document.getElementById('videoPlaceholder').classList.add('d-none');
-    document.getElementById('videoPlayback').classList.add('d-none');
-    preview.classList.remove('d-none');
-    preview.srcObject = stream;
-
-    recordedChunks = [];
-    mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
-    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = handleRecordingStop;
-    mediaRecorder.start();
-
-    toggleBtn('btnRecord', false);
-    toggleBtn('btnStop', true);
-    toggleBtn('btnRetake', false);
-    toggleBtn('btnSend', false);
-
-    document.getElementById('recIndicator').classList.remove('d-none');
-    recordSeconds = 0;
-    updateTimer();
-    recordTimer = setInterval(() => {
-      recordSeconds++;
-      updateTimer();
-      if (recordSeconds >= MAX_SECONDS) stopRecording();
-    }, 1000);
-
-    status.textContent = '🔴 Recording... (max 2 min)';
-  };
-
-  window.stopRecording = function () {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-    if (recordTimer) { clearInterval(recordTimer); recordTimer = null; }
-    document.getElementById('recIndicator').classList.add('d-none');
-  };
-
-  function handleRecordingStop() {
-    recordedBlob = new Blob(recordedChunks, { type: getSupportedMimeType() });
-    const url = URL.createObjectURL(recordedBlob);
-    const playback = document.getElementById('videoPlayback');
-    const preview  = document.getElementById('videoPreview');
-    preview.classList.add('d-none');
-    preview.srcObject = null;
-    playback.src = url;
-    playback.classList.remove('d-none');
-    cleanupStream();
-
-    toggleBtn('btnRecord', false);
-    toggleBtn('btnStop', false);
-    toggleBtn('btnRetake', true);
-    toggleBtn('btnSend', true);
-
-    document.getElementById('videoStatus').innerHTML =
-      `✅ Recorded ${formatTime(recordSeconds)}. Preview above, then click <strong>send</strong> to post.`;
-  }
-
-  window.retakeVideo = function () {
-    resetVideoUI();
-    document.getElementById('videoStatus').textContent = '';
-  };
-
-  window.sendVideo = async function () {
-    const status = document.getElementById('videoStatus');
-    if (!recordedBlob) {
-      status.innerHTML = '<span style="color:#b91c1c">Please record a video first.</span>';
-      return;
-    }
-
-    const btn = document.getElementById('btnSend');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-
-    const formData = new FormData();
-    formData.append('video', recordedBlob, `feedback_${Date.now()}.webm`);
-    formData.append('duration', recordSeconds);
-
-    try {
-      await fetch(`${typeof API_BASE !== 'undefined' ? API_BASE : '/api'}/feedback/video`, {
-        method: 'POST',
-        body: formData,
-      });
-    } catch { /* demo mode */ }
-
-    showToast?.('🎬 Video feedback posted! Thank you 🙏', 'success');
-    resetVideoUI();
-    status.innerHTML = '<span style="color:#138808">✅ Posted successfully!</span>';
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-send-fill"></i>';
-  };
-
-  function resetVideoUI() {
-    if (recordTimer) { clearInterval(recordTimer); recordTimer = null; }
-    cleanupStream();
-    recordedBlob = null;
-    recordedChunks = [];
-    recordSeconds = 0;
-
-    document.getElementById('videoPlaceholder').classList.remove('d-none');
-    document.getElementById('videoPreview').classList.add('d-none');
-    document.getElementById('videoPlayback').classList.add('d-none');
-    document.getElementById('recIndicator').classList.add('d-none');
-    toggleBtn('btnRecord', true);
-    toggleBtn('btnStop', false);
-    toggleBtn('btnRetake', false);
-    toggleBtn('btnSend', false);
-  }
-
-  function cleanupStream() {
-    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-  }
-
-  function getSupportedMimeType() {
-    const types = ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm','video/mp4'];
-    for (const t of types) if (MediaRecorder.isTypeSupported(t)) return t;
-    return 'video/webm';
-  }
-
-  function toggleBtn(id, show) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.toggle('d-none', !show);
-  }
-
-  function updateTimer() {
-    const el = document.getElementById('recTimer');
-    if (el) el.textContent = formatTime(recordSeconds);
-  }
-  function formatTime(s) {
-    return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
-  }
-})();
 
 
 /* ── Carousel auto-play ── */
@@ -606,29 +441,89 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Feedback Wall ── */
   const API = window.location.port === '80' || window.location.port === '' ? '/api' : 'http://localhost:8000';
-  const POSTIT_COLORS = ['#fff176','#f8bbd0','#b3e5fc','#c8e6c9','#ffe0b2'];
-  const ROTATIONS = [-3, 2, -1.5, 3, -2];
+  const POSTIT_COLORS = ['#fff176','#f8bbd0','#b3e5fc','#c8e6c9','#ffe0b2','#d1c4e9'];
+  const ROTATIONS = [-3, 2, -1.5, 3, -2, 1.5];
+  const POSTITS_PER_PAGE = 6;
+  const VIDEOS_PER_PAGE = 6;
+  let allPostits = [];
+  let postitsPage = 0;
+  let allVideos = [];
+  let videosPage = 0;
 
   async function loadFeedbackWall() {
     try {
-      const wRes = await fetch(`${API}/feedback?limit=5`);
+      const wRes = await fetch(`${API}/feedback/approved?limit=50`);
       const wData = await wRes.json();
-      const written = Array.isArray(wData) ? wData : (wData.feedbacks || wData.data || []);
-
-      const vRes = await fetch(`${API}/feedback/video?limit=6`);
-      const vData = await vRes.json();
-      const videos = Array.isArray(vData) ? vData : (vData.feedbacks || vData.data || []);
-
-      renderPostits(written.slice(0, 5));
-      renderVideos(videos.slice(0, 3), 'fbVideosLeft');
-      renderVideos(videos.slice(3, 6), 'fbVideosRight');
-
+      allPostits = Array.isArray(wData) ? wData : (wData.feedbacks || wData.data || []);
+      postitsPage = 0;
+      renderPostitsPage();
     } catch(e) {
-      renderPostits([]);
-      renderVideos([], 'fbVideosLeft');
-      renderVideos([], 'fbVideosRight');
+      allPostits = [];
+      renderPostitsPage();
+    }
+
+    try {
+      const vRes = await fetch(`${API}/feedback/video/approved?limit=50`);
+      const vData = await vRes.json();
+      allVideos = Array.isArray(vData) ? vData : (vData.feedbacks || vData.data || []);
+      videosPage = 0;
+      renderVideosPage();
+    } catch(e) {
+      allVideos = [];
+      renderVideosPage();
     }
   }
+
+  function renderVideosPage() {
+    const totalPages = Math.max(1, Math.ceil(allVideos.length / VIDEOS_PER_PAGE));
+    videosPage = Math.min(videosPage, totalPages - 1);
+    const pageItems = allVideos.slice(videosPage * VIDEOS_PER_PAGE, videosPage * VIDEOS_PER_PAGE + VIDEOS_PER_PAGE);
+    renderVideos(pageItems.slice(0, 3), 'fbVideosLeft');
+    renderVideos(pageItems.slice(3, 6), 'fbVideosRight');
+
+    const pagination = document.getElementById('fbVideosPagination');
+    pagination.classList.toggle('d-none', allVideos.length <= VIDEOS_PER_PAGE);
+    document.getElementById('fbVideosPageIndicator').textContent = `${videosPage + 1} / ${totalPages}`;
+    document.getElementById('fbVideosPrev').disabled = videosPage === 0;
+    document.getElementById('fbVideosNext').disabled = videosPage >= totalPages - 1;
+    updatePaginationDivider();
+  }
+
+  function updatePaginationDivider() {
+    const videosVisible = !document.getElementById('fbVideosPagination').classList.contains('d-none');
+    const postitsVisible = !document.getElementById('fbPostitsPagination').classList.contains('d-none');
+    document.getElementById('fbwallPaginationDivider').classList.toggle('d-none', !(videosVisible && postitsVisible));
+  }
+
+  document.getElementById('fbVideosPrev')?.addEventListener('click', () => {
+    if (videosPage > 0) { videosPage--; renderVideosPage(); }
+  });
+  document.getElementById('fbVideosNext')?.addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(allVideos.length / VIDEOS_PER_PAGE));
+    if (videosPage < totalPages - 1) { videosPage++; renderVideosPage(); }
+  });
+
+  function renderPostitsPage() {
+    const totalPages = Math.max(1, Math.ceil(allPostits.length / POSTITS_PER_PAGE));
+    postitsPage = Math.min(postitsPage, totalPages - 1);
+    const pageItems = allPostits.slice(postitsPage * POSTITS_PER_PAGE, postitsPage * POSTITS_PER_PAGE + POSTITS_PER_PAGE);
+    renderPostits(pageItems);
+
+    const pagination = document.getElementById('fbPostitsPagination');
+    pagination.classList.toggle('d-none', allPostits.length <= POSTITS_PER_PAGE);
+    document.getElementById('fbPostitsPageIndicator').textContent = `${postitsPage + 1} / ${totalPages}`;
+    document.getElementById('fbPostitsPrev').disabled = postitsPage === 0;
+    document.getElementById('fbPostitsNext').disabled = postitsPage >= totalPages - 1;
+    updatePaginationDivider();
+  }
+
+  document.getElementById('fbPostitsPrev')?.addEventListener('click', () => {
+    if (postitsPage > 0) { postitsPage--; renderPostitsPage(); }
+  });
+  document.getElementById('fbPostitsNext')?.addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(allPostits.length / POSTITS_PER_PAGE));
+    if (postitsPage < totalPages - 1) { postitsPage++; renderPostitsPage(); }
+  });
 
   function renderPostits(items) {
     const el = document.getElementById('fbPostits');
@@ -655,13 +550,14 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     el.innerHTML = items.map(fb => {
-      const url = fb.videoUrl || fb.video_url || fb.url || '';
+      const videoId = fb.youtube_video_id || '';
       return `
       <div class="fbwall-video-card">
-        <video src="${url}" controls playsinline preload="metadata" class="fbwall-video"></video>
+        <div class="ratio ratio-16x9">
+          <iframe src="https://www.youtube.com/embed/${videoId}" title="${fb.name || 'Video feedback'}" class="fbwall-video" allowfullscreen></iframe>
+        </div>
         <div class="fbwall-video-meta">
-          <span class="fbwall-video-name">${fb.name || fb.fbname || 'Anonymous'}</span>
-          ${fb.event || fb.fbevent ? `<span class="fbwall-video-event">${fb.event || fb.fbevent}</span>` : ''}
+          <span class="fbwall-video-name">${fb.name || 'Anonymous'}</span>
         </div>
       </div>`;
     }).join('');

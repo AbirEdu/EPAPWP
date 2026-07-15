@@ -54,6 +54,31 @@ class FeedbackCreate(BaseModel):
 
 class FeedbackOut(FeedbackCreate):
     id: str
+    status: str = "pending"
+    created_at: Optional[datetime] = None
+    class Config: orm_mode = True
+
+class FeedbackPublicOut(BaseModel):
+    id: str
+    name: str
+    event: Optional[str] = None
+    message: str
+    created_at: Optional[datetime] = None
+    class Config: orm_mode = True
+
+class VideoFeedbackOut(BaseModel):
+    id: str
+    name: str
+    youtube_video_id: str
+    duration: Optional[int] = None
+    status: str = "pending"
+    created_at: Optional[datetime] = None
+    class Config: orm_mode = True
+
+class VideoFeedbackPublicOut(BaseModel):
+    id: str
+    name: str
+    youtube_video_id: str
     created_at: Optional[datetime] = None
     class Config: orm_mode = True
 

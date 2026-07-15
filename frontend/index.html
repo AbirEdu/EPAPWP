@@ -383,6 +383,21 @@
         <div class="fbwall-postits" id="fbPostits"><div class="fbwall-loading"><i class="bi bi-hourglass-split"></i> Loading...</div></div>
         <div class="fbwall-videos fbwall-videos-right" id="fbVideosRight"><div class="fbwall-loading"><i class="bi bi-hourglass-split"></i> Loading...</div></div>
       </div>
+      <div class="fbwall-pagination-row">
+        <div class="fbwall-pagination d-none" id="fbVideosPagination">
+          <span class="fbwall-page-label"><i class="bi bi-camera-video-fill"></i> Videos</span>
+          <button type="button" class="fbwall-page-arrow" id="fbVideosPrev" aria-label="Previous videos"><i class="bi bi-chevron-left"></i></button>
+          <span class="fbwall-page-indicator" id="fbVideosPageIndicator">1 / 1</span>
+          <button type="button" class="fbwall-page-arrow" id="fbVideosNext" aria-label="Next videos"><i class="bi bi-chevron-right"></i></button>
+        </div>
+        <div class="fbwall-pagination-divider d-none" id="fbwallPaginationDivider"></div>
+        <div class="fbwall-pagination d-none" id="fbPostitsPagination">
+          <span class="fbwall-page-label"><i class="bi bi-chat-square-text-fill"></i> Feedback</span>
+          <button type="button" class="fbwall-page-arrow" id="fbPostitsPrev" aria-label="Previous feedback"><i class="bi bi-chevron-left"></i></button>
+          <span class="fbwall-page-indicator" id="fbPostitsPageIndicator">1 / 1</span>
+          <button type="button" class="fbwall-page-arrow" id="fbPostitsNext" aria-label="Next feedback"><i class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
       <div class="text-center mt-2 mb-5"><div class="fb-wall-divider"></div></div>
       <div class="section-header text-center mb-5">
         <span class="section-label">Your Voice</span>
@@ -414,6 +429,8 @@
         <!-- RIGHT: Video Feedback -->
         <div class="fb-col fb-col-video">
           <h6 class="fb-col-title"><i class="bi bi-camera-video-fill"></i> Video Feedback</h6>
+
+          <input type="text" class="form-control mb-3" id="vbName" placeholder="Your Name" required>
 
           <!-- The video screen with camera icon overlay -->
           <div class="video-screen" id="videoScreen">

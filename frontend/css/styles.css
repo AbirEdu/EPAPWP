@@ -1642,16 +1642,15 @@ nav#mainNav .btn-join {
 .pwp-fc-role { color: var(--gold); font-size: 0.68rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; white-space: nowrap; }
 
 /* ════ FEEDBACK WALL ════ */
-.fbwall-layout { display: grid; grid-template-columns: 200px 1fr 200px; gap: 20px; align-items: start; margin-bottom: 40px; min-height: 420px; }
+.fbwall-layout { display: grid; grid-template-columns: 200px 1fr 200px; gap: 20px; align-items: stretch; margin-bottom: 40px; min-height: 420px; }
 .fbwall-videos { display: flex; flex-direction: column; gap: 14px; }
 .fbwall-video-card { background: #1a1a2e; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: transform 0.2s; }
 .fbwall-video-card:hover { transform: scale(1.02); }
-.fbwall-video { width: 100%; height: 110px; object-fit: cover; display: block; background: #000; }
+.fbwall-video { width: 100%; height: 100%; border: 0; display: block; background: #000; }
 .fbwall-video-meta { padding: 6px 10px 8px; }
 .fbwall-video-name { display: block; font-size: 0.75rem; font-weight: 600; color: #fff; font-family: 'Playfair Display', serif; }
 .fbwall-video-event { display: block; font-size: 0.65rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-.fbwall-postits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; padding: 20px; background: #f5f0e8; border-radius: 16px; box-shadow: inset 0 2px 12px rgba(0,0,0,0.08); position: relative; min-height: 360px; align-items: start; }
-.fbwall-postits > .postit:nth-child(3) { grid-column: 1 / -1; width: 60%; margin: 0 auto; }
+.fbwall-postits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 20px; background: #f5f0e8; border-radius: 16px; box-shadow: inset 0 2px 12px rgba(0,0,0,0.08); position: relative; min-height: 360px; align-items: center; align-content: center; height: 100%; }
 .postit { position: relative; padding: 22px 16px 16px; border-radius: 3px; box-shadow: 3px 4px 14px rgba(0,0,0,0.18); transition: transform 0.2s, box-shadow 0.2s; cursor: default; }
 .postit:hover { transform: scale(1.04) rotate(0deg) !important; box-shadow: 6px 8px 24px rgba(0,0,0,0.28); z-index: 2; }
 .postit-pin { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: radial-gradient(circle at 40% 35%, #ff6b6b, #c0392b); border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
@@ -1665,6 +1664,31 @@ nav#mainNav .btn-join {
 .fbwall-empty-video { text-align: center; color: #aaa; padding: 20px 10px; font-size: 0.78rem; }
 .fbwall-empty-video i { font-size: 1.6rem; display: block; margin-bottom: 6px; }
 .fb-wall-divider { height: 2px; background: linear-gradient(90deg, transparent, #e0dbd4, transparent); width: 60%; margin: 0 auto; }
+
+.fbwall-pagination-row { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 18px; flex-wrap: wrap; }
+.fbwall-pagination-divider { width: 1px; height: 28px; background: #e0d8d0; }
+.fbwall-pagination { display: flex; align-items: center; gap: 10px; }
+.fbwall-page-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--crimson);
+}
+.fbwall-page-arrow {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid #e0d8d0; background: #fff; color: var(--crimson);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; cursor: pointer; transition: var(--transition);
+}
+.fbwall-page-arrow:hover:not(:disabled) { background: var(--crimson); color: #fff; border-color: var(--crimson); }
+.fbwall-page-arrow:disabled { opacity: 0.35; cursor: default; }
+.fbwall-page-indicator { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); min-width: 40px; text-align: center; }
+
+@media (max-width: 768px) {
+  .fbwall-postits { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .fbwall-postits { grid-template-columns: 1fr; }
+}
 
 /* ── About EPA Download Button ── */
 .btn-about-download {
