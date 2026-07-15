@@ -1,8 +1,11 @@
-# Replace ekalavyaperformingarts.com below with your real domain once you've
-# registered and pointed it at this server's IP. Caddy automatically gets and
-# renews a free HTTPS certificate for whatever domain is listed here — no
-# manual certbot steps needed.
+# Caddy automatically gets and renews a free HTTPS certificate for whatever
+# domain is listed here — no manual certbot steps needed. epapwp.in is the
+# canonical domain; www redirects to it.
 
-ekalavyaperformingarts.com, www.ekalavyaperformingarts.com {
+www.epapwp.in {
+    redir https://epapwp.in{uri} permanent
+}
+
+epapwp.in {
     reverse_proxy frontend:80
 }
