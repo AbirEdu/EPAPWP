@@ -62,6 +62,7 @@
         <a class="nav-item active" data-tab="dashboard" onclick="showTab('dashboard',this)"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
         <a class="nav-item" data-tab="members" onclick="showTab('members',this)"><i class="bi bi-people"></i><span>Members</span></a>
         <a class="nav-item" data-tab="feedback" onclick="showTab('feedback',this)"><i class="bi bi-chat-left-text"></i><span>Feedback</span></a>
+        <a class="nav-item" data-tab="carousel" onclick="showTab('carousel',this)"><i class="bi bi-images"></i><span>Content</span></a>
         <a class="nav-item" data-tab="users" onclick="showTab('users',this)"><i class="bi bi-person-gear"></i><span>Admin Users</span></a>
         <a class="nav-item" data-tab="newmember" onclick="showTab('newmember',this)"><i class="bi bi-person-plus"></i><span>Add Member</span></a>
       </nav>
@@ -153,6 +154,19 @@
           </div>
           <div class="admin-card-body">
             <div id="videoFeedbackList" class="feedback-admin-list">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAROUSEL / CONTENT TAB -->
+      <div id="tab-carousel" class="tab-pane d-none">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h6>Homepage Carousel <span class="text-muted fw-normal" style="font-size:0.72rem;">— 2–8 live slides recommended</span></h6>
+            <button class="btn btn-sm btn-crimson" onclick="openSlideForm()"><i class="bi bi-plus-lg"></i> Add Slide</button>
+          </div>
+          <div class="admin-card-body">
+            <div id="carouselSlidesGrid" class="carousel-admin-grid">Loading...</div>
           </div>
         </div>
       </div>
@@ -285,6 +299,73 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body" id="memberDetailBody">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carousel Slide Add/Edit Modal -->
+  <div class="modal fade" id="slideFormModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background:#0f0f1a;color:#fff">
+          <h5 class="modal-title" id="slideFormTitle"><i class="bi bi-images me-2"></i>Add Carousel Slide</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="slideForm">
+            <input type="hidden" name="slide_id" value="">
+            <div class="mb-3">
+              <label class="form-label">Poster Image <span class="text-danger" id="posterRequiredMark">*</span></label>
+              <input type="file" class="form-control" name="poster" accept="image/jpeg,image/png,image/webp" id="slidePosterInput">
+              <div class="form-text">Recommended 1600×1000px (landscape), JPEG/PNG/WEBP, max 4MB. When editing, leave blank to keep the current poster.</div>
+              <img id="slidePosterPreview" class="d-none mt-2" style="max-height:140px;border-radius:8px;border:1px solid #eee;">
+            </div>
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label">Show Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="show_name" placeholder="e.g. Kalakriti 2026 Part 1" required minlength="2">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Category <span class="text-danger">*</span></label>
+                <select class="form-select" name="category" required>
+                  <option value="EPA">Ekalavya Performing Arts</option>
+                  <option value="PWP">Picture Wicture Productions</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Event Date</label>
+                <input type="date" class="form-control" name="event_date">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Venue</label>
+                <input type="text" class="form-control" name="venue" placeholder="e.g. Jagriti Theatre, Bengaluru">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Short Description</label>
+                <textarea class="form-control" name="description" rows="2" maxlength="300" placeholder="One or two lines about the show"></textarea>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">Booking Link</label>
+                <input type="url" class="form-control" name="booking_url" placeholder="https://bookmyshow.com/... — leave blank for &quot;Opening Soon&quot;">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Display Order</label>
+                <input type="number" class="form-control" name="order" value="0" min="0">
+              </div>
+              <div class="col-12">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="slideActiveCheck" name="active" checked>
+                  <label class="form-check-label" for="slideActiveCheck">Show on homepage</label>
+                </div>
+              </div>
+            </div>
+            <div id="slideFormAlert" class="alert d-none py-2 small mt-3 mb-0"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="slideForm" class="btn btn-crimson" id="slideFormSubmitBtn">Save Slide</button>
+        </div>
       </div>
     </div>
   </div>

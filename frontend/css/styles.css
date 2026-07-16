@@ -241,6 +241,16 @@ body {
   transform: translateY(-2px);
 }
 
+.btn-hero:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.btn-hero:disabled:hover {
+  background: transparent;
+  color: #fff;
+  transform: none;
+}
+
 @media (max-width: 768px) {
   .hero-content { padding: 0 20px; }
   .carousel-inner, .carousel-item, .hero-slide { height: 72vh; min-height: 380px; }

@@ -143,11 +143,12 @@ function showTab(tab, el) {
   document.getElementById(`tab-${tab}`).classList.remove('d-none');
   if (el) el.classList.add('active');
   else document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
-  const titles = { dashboard:'Dashboard', members:'Members', feedback:'Feedback', users:'Admin Users' };
+  const titles = { dashboard:'Dashboard', members:'Members', feedback:'Feedback', carousel:'Content', users:'Admin Users' };
   document.getElementById('topbarTitle').textContent = titles[tab] || tab;
 
   if (tab === 'members')  loadMembers();
   if (tab === 'feedback') { loadFeedback(); loadVideoFeedback(); }
+  if (tab === 'carousel') loadCarouselSlides();
   if (tab === 'users')    loadUsers();
 }
 
@@ -378,6 +379,166 @@ async function setVideoFeedbackStatus(id, status, btn) {
   } catch (err) {
     showToast(err.message, 'danger');
     btn.disabled = false;
+  }
+}
+
+// ─── CAROUSEL / CONTENT ───
+const CATEGORY_LABELS = { EPA: 'Ekalavya Performing Arts', PWP: 'Picture Wicture Productions' };
+let editingSlideId = null;
+let _carouselSlidesCache = [];
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadCarouselSlides() {
+  const el = document.getElementById('carouselSlidesGrid');
+  el.innerHTML = '<div class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</div>';
+  try {
+    const slides = await apiGet('/carousel');
+    _carouselSlidesCache = slides;
+    if (!slides.length) {
+      el.innerHTML = '<p class="text-muted text-center py-4">No carousel slides yet. Click "Add Slide" to create your first one.</p>';
+      return;
+    }
+    const activeCount = slides.filter(s => s.active).length;
+    const warning = activeCount < 2
+      ? `<div class="alert alert-warning py-2 small mb-3">Only ${activeCount} slide${activeCount === 1 ? '' : 's'} live — add at least 2 so the homepage carousel has something to cycle through.</div>`
+      : (activeCount > 8 ? `<div class="alert alert-warning py-2 small mb-3">${activeCount} slides live — only the first 8 (by display order) will show on the homepage.</div>` : '');
+    el.innerHTML = warning + '<div class="carousel-admin-cards">' + slides.map(s => `
+      <div class="carousel-admin-card">
+        <div class="carousel-admin-thumb" style="background-image:url('${s.poster_image}')"></div>
+        <div class="carousel-admin-info">
+          <div class="carousel-admin-name">${escapeHtml(s.show_name)}</div>
+          <div class="carousel-admin-meta">
+            <span class="interest-tag">${CATEGORY_LABELS[s.category] || s.category}</span>
+            ${s.event_date ? `<span>${new Date(s.event_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>` : ''}
+            ${s.venue ? `<span>${escapeHtml(s.venue)}</span>` : ''}
+          </div>
+          <span class="badge-status ${s.active ? 'badge-active' : 'badge-inactive'}">${s.active ? 'Live' : 'Hidden'}</span>
+        </div>
+        <div class="carousel-admin-actions">
+          <button class="btn-sm-action btn-view" onclick="openSlideForm('${s.id}')">Edit</button>
+          <button class="btn-sm-action ${s.active ? 'btn-inactive' : 'btn-approve'}" onclick="toggleSlideActive('${s.id}', ${!s.active})">${s.active ? 'Hide' : 'Show'}</button>
+          <button class="btn-sm-action btn-inactive" onclick="deleteSlide('${s.id}')">Delete</button>
+        </div>
+      </div>`).join('') + '</div>';
+  } catch (err) {
+    el.innerHTML = `<p class="text-danger">${err.message}</p>`;
+  }
+}
+
+function openSlideForm(id) {
+  const slide = id ? _carouselSlidesCache.find(s => s.id === id) : null;
+  editingSlideId = slide ? slide.id : null;
+  const form = document.getElementById('slideForm');
+  form.reset();
+  document.getElementById('slideFormAlert').classList.add('d-none');
+  document.getElementById('slidePosterPreview').classList.add('d-none');
+  document.getElementById('slideFormTitle').innerHTML = slide
+    ? '<i class="bi bi-images me-2"></i>Edit Carousel Slide'
+    : '<i class="bi bi-images me-2"></i>Add Carousel Slide';
+  document.getElementById('posterRequiredMark').style.display = slide ? 'none' : 'inline';
+  document.getElementById('slidePosterInput').required = !slide;
+
+  if (slide) {
+    form.show_name.value = slide.show_name || '';
+    form.category.value = slide.category || 'EPA';
+    form.event_date.value = slide.event_date || '';
+    form.venue.value = slide.venue || '';
+    form.description.value = slide.description || '';
+    form.booking_url.value = slide.booking_url || '';
+    form.order.value = slide.order ?? 0;
+    document.getElementById('slideActiveCheck').checked = !!slide.active;
+    if (slide.poster_image) {
+      const preview = document.getElementById('slidePosterPreview');
+      preview.src = slide.poster_image;
+      preview.classList.remove('d-none');
+    }
+  } else {
+    document.getElementById('slideActiveCheck').checked = true;
+  }
+
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('slideFormModal')).show();
+}
+
+document.getElementById('slidePosterInput')?.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const preview = document.getElementById('slidePosterPreview');
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { preview.src = reader.result; preview.classList.remove('d-none'); };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('slideForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('slideFormSubmitBtn');
+  const alertEl = document.getElementById('slideFormAlert');
+  alertEl.classList.add('d-none');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  const fd = new FormData();
+  fd.append('show_name', form.show_name.value);
+  fd.append('category', form.category.value);
+  fd.append('event_date', form.event_date.value || '');
+  fd.append('venue', form.venue.value || '');
+  fd.append('description', form.description.value || '');
+  fd.append('booking_url', form.booking_url.value || '');
+  fd.append('order', form.order.value || '0');
+  fd.append('active', document.getElementById('slideActiveCheck').checked ? 'true' : 'false');
+  const posterFile = document.getElementById('slidePosterInput').files[0];
+  if (posterFile) fd.append('poster', posterFile);
+
+  try {
+    const token = getToken();
+    const url = editingSlideId ? `${API}/carousel/${editingSlideId}` : `${API}/carousel`;
+    const res = await fetch(url, {
+      method: editingSlideId ? 'PATCH' : 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+
+    bootstrap.Modal.getInstance(document.getElementById('slideFormModal'))?.hide();
+    showToast(editingSlideId ? 'Slide updated' : 'Slide added', 'success');
+    loadCarouselSlides();
+  } catch (err) {
+    alertEl.className = 'alert alert-danger py-2 small mt-3 mb-0';
+    alertEl.textContent = err.message;
+    alertEl.classList.remove('d-none');
+  }
+  btn.disabled = false; btn.textContent = 'Save Slide';
+});
+
+async function toggleSlideActive(id, active) {
+  try {
+    const fd = new FormData();
+    fd.append('active', active ? 'true' : 'false');
+    const token = getToken();
+    const res = await fetch(`${API}/carousel/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: fd });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+    showToast(active ? 'Slide is now live' : 'Slide hidden', 'success');
+    loadCarouselSlides();
+  } catch (err) {
+    showToast(err.message, 'danger');
+  }
+}
+
+async function deleteSlide(id) {
+  const slide = _carouselSlidesCache.find(s => s.id === id);
+  if (!confirm(`Delete the "${slide ? slide.show_name : 'this'}" slide? This can't be undone.`)) return;
+  try {
+    const token = getToken();
+    const res = await fetch(`${API}/carousel/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.detail || `HTTP ${res.status}`); }
+    showToast('Slide deleted', 'success');
+    loadCarouselSlides();
+  } catch (err) {
+    showToast(err.message, 'danger');
   }
 }
 

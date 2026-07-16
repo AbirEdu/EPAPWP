@@ -24,6 +24,69 @@ function formatApiError(data, fallback) {
   return fallback;
 }
 
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ══════════════════════════════════════════
+// HERO CAROUSEL — admin-managed slides (Content tab in the admin panel).
+// Falls back to the static slides already in the HTML below if the API
+// returns none, so the homepage is never left with an empty carousel.
+// ══════════════════════════════════════════
+(async function loadHeroCarousel() {
+  const CATEGORY_LABELS = { EPA: 'Ekalavya Performing Arts', PWP: 'Picture Wicture Productions' };
+  try {
+    const res = await fetch(`${API_BASE}/carousel/active`);
+    if (!res.ok) return;
+    const slides = await res.json();
+    if (!Array.isArray(slides) || slides.length === 0) return;
+
+    const indicators = document.getElementById('carouselIndicators');
+    const inner = document.getElementById('carouselInner');
+    const carouselEl = document.getElementById('eventCarousel');
+    if (!indicators || !inner || !carouselEl) return;
+
+    indicators.innerHTML = slides.map((_, i) =>
+      `<button type="button" data-bs-target="#eventCarousel" data-bs-slide-to="${i}" class="${i === 0 ? 'active' : ''}"></button>`
+    ).join('');
+
+    inner.innerHTML = slides.map((s, i) => {
+      const metaParts = [];
+      if (s.event_date) {
+        const d = new Date(s.event_date);
+        if (!isNaN(d.getTime())) metaParts.push(`<i class="bi bi-calendar3"></i> ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`);
+      }
+      if (s.venue) metaParts.push(`<i class="bi bi-geo-alt-fill"></i> ${escapeHtml(s.venue)}`);
+      const meta = metaParts.length ? `<p class="hero-meta">${metaParts.join(' &nbsp;·&nbsp; ')}</p>` : '';
+      const desc = s.description ? `<p>${escapeHtml(s.description)}</p>` : '';
+      const cta = s.booking_url
+        ? `<a class="btn btn-hero" href="${escapeHtml(s.booking_url)}" target="_blank" rel="noopener">Book Your Ticket</a>`
+        : `<button class="btn btn-hero" disabled>Book Your Ticket - Opening Soon</button>`;
+      return `
+        <div class="carousel-item ${i === 0 ? 'active' : ''}">
+          <div class="hero-slide kotha-slide" style="background-color:#110010;background-image:linear-gradient(135deg,#0f0f1a 0%,#2a0020 100%);">
+            <div class="kotha-text hero-content">
+              <span class="hero-tag">${escapeHtml(CATEGORY_LABELS[s.category] || s.category)}</span>
+              <h2>${escapeHtml(s.show_name)}</h2>
+              ${desc}
+              ${meta}
+              ${cta}
+            </div>
+            <div class="kotha-image">
+              <img src="${s.poster_image}" alt="${escapeHtml(s.show_name)}">
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Re-init the Bootstrap Carousel now that its slides changed under it
+    if (window.bootstrap?.Carousel) {
+      bootstrap.Carousel.getInstance(carouselEl)?.dispose();
+      new bootstrap.Carousel(carouselEl, { interval: 4500, ride: 'carousel' });
+    }
+  } catch { /* network/parse error — keep the static fallback slides */ }
+})();
+
 // ══════════════════════════════════════════
 // MODAL HELPERS  (Bootstrap + manual fallback)
 // ══════════════════════════════════════════

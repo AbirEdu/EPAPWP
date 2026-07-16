@@ -83,6 +83,22 @@ class VideoFeedbackOut(BaseModel):
     created_at: Optional[datetime] = None
     class Config: orm_mode = True
 
+VALID_CAROUSEL_CATEGORIES = {"EPA", "PWP"}
+
+class CarouselSlideOut(BaseModel):
+    id: str
+    show_name: str
+    event_date: Optional[str] = None
+    venue: Optional[str] = None
+    category: str
+    description: Optional[str] = None
+    booking_url: Optional[str] = None
+    poster_image: str
+    order: int = 0
+    active: bool = True
+    created_at: Optional[datetime] = None
+    class Config: orm_mode = True
+
 class VideoFeedbackPublicOut(BaseModel):
     id: str
     name: str

@@ -5,13 +5,14 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from datetime import datetime, timedelta
 from typing import Optional, List
-import asyncio, os, jwt, bcrypt
+import asyncio, os, jwt, bcrypt, base64
 
 from app.models import (
     MemberRegistration, MemberRegistrationOut,
     FeedbackCreate, FeedbackOut, FeedbackPublicOut,
     VideoFeedbackOut, VideoFeedbackPublicOut,
     LoginRequest, TokenResponse, UserCreate, UserOut,
+    CarouselSlideOut, VALID_CAROUSEL_CATEGORIES,
 )
 from app import youtube as yt
 
@@ -59,6 +60,8 @@ async def startup():
     await db.feedback.create_index("status")
     await db.video_feedback.create_index("created_at")
     await db.video_feedback.create_index("status")
+    await db.carousel.create_index("active")
+    await db.carousel.create_index("order")
     if not await db.users.find_one({}):
         admin_username = os.getenv("ADMIN_USERNAME")
         admin_password = os.getenv("ADMIN_PASSWORD")
@@ -267,6 +270,110 @@ async def update_video_feedback_status(video_id: str, status: str, admin=Depends
     r = await app.state.db.video_feedback.update_one({"_id": oid}, {"$set": {"status": status}})
     if r.matched_count == 0: raise HTTPException(404, "Not found")
     return {"message": f"Status → {status}"}
+
+# CAROUSEL (homepage hero content management)
+MAX_POSTER_BYTES = 4 * 1024 * 1024  # 4MB
+VALID_POSTER_TYPES = {"image/jpeg", "image/png", "image/webp"}
+MAX_ACTIVE_SLIDES = 8
+
+async def _read_poster(poster: UploadFile) -> str:
+    if poster.content_type not in VALID_POSTER_TYPES:
+        raise HTTPException(400, "Poster must be a JPEG, PNG, or WEBP image.")
+    contents = await poster.read()
+    if len(contents) > MAX_POSTER_BYTES:
+        raise HTTPException(400, "Poster image is too large (max 4MB).")
+    b64 = base64.b64encode(contents).decode()
+    return f"data:{poster.content_type};base64,{b64}"
+
+@app.post("/carousel", response_model=CarouselSlideOut, tags=["carousel"], status_code=201)
+async def create_carousel_slide(
+    show_name: str = Form(..., min_length=2, max_length=120),
+    event_date: Optional[str] = Form(None),
+    venue: Optional[str] = Form(None),
+    category: str = Form(...),
+    description: Optional[str] = Form(None, max_length=300),
+    booking_url: Optional[str] = Form(None),
+    order: int = Form(0),
+    active: bool = Form(True),
+    poster: UploadFile = File(...),
+    admin=Depends(require_admin),
+):
+    if category not in VALID_CAROUSEL_CATEGORIES:
+        raise HTTPException(400, "Category must be EPA or PWP")
+    if active:
+        active_count = await app.state.db.carousel.count_documents({"active": True})
+        if active_count >= MAX_ACTIVE_SLIDES:
+            raise HTTPException(400, f"Maximum of {MAX_ACTIVE_SLIDES} active slides reached. Deactivate one first.")
+    poster_data = await _read_poster(poster)
+    doc = {
+        "show_name": show_name, "event_date": event_date or None, "venue": venue or None,
+        "category": category, "description": description or None, "booking_url": booking_url or None,
+        "poster_image": poster_data, "order": order, "active": active,
+        "created_at": datetime.utcnow(),
+    }
+    result = await app.state.db.carousel.insert_one(doc)
+    created = await app.state.db.carousel.find_one({"_id": result.inserted_id})
+    return _serialize(created)
+
+@app.get("/carousel/active", response_model=List[CarouselSlideOut], tags=["carousel"])
+async def list_active_carousel_slides():
+    cursor = app.state.db.carousel.find({"active": True}).sort([("order", 1), ("created_at", 1)]).limit(MAX_ACTIVE_SLIDES)
+    return [_serialize(s) for s in await cursor.to_list(length=MAX_ACTIVE_SLIDES)]
+
+@app.get("/carousel", response_model=List[CarouselSlideOut], tags=["carousel"])
+async def list_carousel_slides(admin=Depends(require_admin)):
+    cursor = app.state.db.carousel.find({}).sort([("order", 1), ("created_at", 1)])
+    return [_serialize(s) for s in await cursor.to_list(length=100)]
+
+@app.patch("/carousel/{slide_id}", response_model=CarouselSlideOut, tags=["carousel"])
+async def update_carousel_slide(
+    slide_id: str,
+    show_name: Optional[str] = Form(None),
+    event_date: Optional[str] = Form(None),
+    venue: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    booking_url: Optional[str] = Form(None),
+    order: Optional[int] = Form(None),
+    active: Optional[bool] = Form(None),
+    poster: Optional[UploadFile] = File(None),
+    admin=Depends(require_admin),
+):
+    try: oid = ObjectId(slide_id)
+    except: raise HTTPException(400, "Invalid ID")
+    existing = await app.state.db.carousel.find_one({"_id": oid})
+    if not existing: raise HTTPException(404, "Not found")
+
+    if category is not None and category not in VALID_CAROUSEL_CATEGORIES:
+        raise HTTPException(400, "Category must be EPA or PWP")
+    if active and not existing.get("active"):
+        active_count = await app.state.db.carousel.count_documents({"active": True})
+        if active_count >= MAX_ACTIVE_SLIDES:
+            raise HTTPException(400, f"Maximum of {MAX_ACTIVE_SLIDES} active slides reached. Deactivate one first.")
+
+    update = {}
+    if show_name is not None: update["show_name"] = show_name
+    if event_date is not None: update["event_date"] = event_date or None
+    if venue is not None: update["venue"] = venue or None
+    if category is not None: update["category"] = category
+    if description is not None: update["description"] = description or None
+    if booking_url is not None: update["booking_url"] = booking_url or None
+    if order is not None: update["order"] = order
+    if active is not None: update["active"] = active
+    if poster is not None and poster.filename: update["poster_image"] = await _read_poster(poster)
+
+    if update:
+        await app.state.db.carousel.update_one({"_id": oid}, {"$set": update})
+    updated = await app.state.db.carousel.find_one({"_id": oid})
+    return _serialize(updated)
+
+@app.delete("/carousel/{slide_id}", tags=["carousel"])
+async def delete_carousel_slide(slide_id: str, admin=Depends(require_admin)):
+    try: oid = ObjectId(slide_id)
+    except: raise HTTPException(400, "Invalid ID")
+    r = await app.state.db.carousel.delete_one({"_id": oid})
+    if r.deleted_count == 0: raise HTTPException(404, "Not found")
+    return {"message": "Slide deleted"}
 
 # STATS
 @app.get("/stats", tags=["stats"])

@@ -317,6 +317,32 @@ body { font-family: 'DM Sans', sans-serif; background: #f4f5f7; color: #1a1a1a; 
 .detail-label { font-weight: 600; min-width: 160px; color: #666; }
 .detail-value { color: #1a1a1a; }
 
+/* Carousel / content management */
+.carousel-admin-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+.carousel-admin-card {
+  background: #fafaf8;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #f0ebe4;
+  display: flex;
+  flex-direction: column;
+}
+.carousel-admin-thumb {
+  height: 130px;
+  background-size: cover;
+  background-position: center;
+  background-color: #eee;
+}
+.carousel-admin-info { padding: 12px 14px 6px; flex: 1; }
+.carousel-admin-name { font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; }
+.carousel-admin-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.75rem; color: #777; margin-bottom: 8px; }
+.carousel-admin-actions { display: flex; gap: 6px; padding: 10px 14px 14px; }
+.carousel-admin-actions .btn-sm-action { flex: 1; }
+
 /* Responsive */
 @media (max-width: 992px) {
   .admin-sidebar { transform: translateX(-100%); }
