@@ -4,6 +4,26 @@
 // Uses nginx proxy on Docker (:80), direct on local dev (:3000/:8000)
 const API_BASE = window.location.port === '80' || window.location.port === '' ? '/api' : 'http://localhost:8000';
 
+// Turns a FastAPI error body into readable text — `detail` can be a plain
+// string or (on 422 validation errors) an array of {loc, msg} objects.
+function formatApiError(data, fallback) {
+  const detail = data && data.detail;
+  if (!detail) return fallback;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map(d => {
+        if (typeof d === 'string') return d;
+        const field = Array.isArray(d.loc) ? d.loc[d.loc.length - 1] : '';
+        const hideField = !field || field === '__root__' || field === 'body';
+        return hideField ? d.msg : `${field}: ${d.msg}`;
+      })
+      .filter(Boolean)
+      .join(' | ') || fallback;
+  }
+  return fallback;
+}
+
 // ══════════════════════════════════════════
 // MODAL HELPERS  (Bootstrap + manual fallback)
 // ══════════════════════════════════════════
@@ -43,6 +63,47 @@ document.addEventListener('click', e => {
 });
 
 // ══════════════════════════════════════════
+// DATE OF BIRTH → auto-calculated Age + conditional Parent's Name
+// ══════════════════════════════════════════
+const dobInput          = document.getElementById('dobInput');
+const ageField           = document.getElementById('ageField');
+const parentNameWrapper  = document.getElementById('parentNameWrapper');
+const parentNameInput    = document.getElementById('parentNameInput');
+
+function calculateAge(dobStr) {
+  const dob = new Date(dobStr);
+  if (isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const monthDiff = today.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+// Note: parent_name is intentionally never marked `required` in the DOM —
+// it's conditionally hidden, and a hidden required field breaks native
+// checkValidity()/reportValidity(). The <18 requirement is instead enforced
+// explicitly in the submit handler below.
+function updateAgeAndParentField() {
+  const age = calculateAge(dobInput?.value);
+  if (age === null || age < 0) {
+    ageField.value = '';
+    parentNameWrapper.classList.add('d-none');
+    return;
+  }
+  ageField.value = age;
+  if (age < 18) {
+    parentNameWrapper.classList.remove('d-none');
+  } else {
+    parentNameWrapper.classList.add('d-none');
+    parentNameInput.value = '';
+  }
+}
+
+dobInput?.addEventListener('change', updateAgeAndParentField);
+dobInput?.addEventListener('input', updateAgeAndParentField);
+
+// ══════════════════════════════════════════
 // JOIN US — opens registration directly, no login
 // ══════════════════════════════════════════
 window.openRegistrationDirect = function () {
@@ -50,6 +111,7 @@ window.openRegistrationDirect = function () {
   if (alertEl) { alertEl.className = 'alert d-none'; alertEl.textContent = ''; }
   document.getElementById('registrationForm')?.reset();
   document.querySelectorAll('.rating-badge').forEach(b => b.textContent = '5');
+  updateAgeAndParentField();
   openModal('registerModal');
 };
 
@@ -95,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res.ok) {
         ok = true;
       } else {
-        errBox.textContent = data.detail || 'Invalid credentials.';
+        errBox.textContent = formatApiError(data, 'Invalid credentials.');
         errBox.classList.remove('d-none');
       }
     } catch {
@@ -128,6 +190,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!form.checkValidity()) { form.reportValidity(); return; }
 
+    const age = calculateAge(form.dob.value);
+    if (age === null || age < 0) {
+      alertEl.className = 'alert alert-warning';
+      alertEl.textContent = 'Please enter a valid Date of Birth.';
+      alertEl.classList.remove('d-none');
+      return;
+    }
+    if (age < 5 || age > 100) {
+      alertEl.className = 'alert alert-warning';
+      alertEl.textContent = 'Age calculated from Date of Birth must be between 5 and 100.';
+      alertEl.classList.remove('d-none');
+      return;
+    }
+    if (age < 18 && !form.parent_name.value.trim()) {
+      alertEl.className = 'alert alert-warning';
+      alertEl.textContent = "Please enter the Parent's / Guardian's Name (required for registrants under 18).";
+      alertEl.classList.remove('d-none');
+      return;
+    }
+
     const interests = [...form.querySelectorAll('input[name="interests"]:checked')].map(c => c.value);
     if (!interests.length) {
       alertEl.className = 'alert alert-warning';
@@ -143,10 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const payload = {
       name:              form.name.value,
-      parent_name:       form.parent_name.value,
+      parent_name:       form.parent_name.value || undefined,
       phone:             form.phone.value,
       email:             form.email.value,
-      age:               parseInt(form.age.value),
+      age:               age,
       dob:               form.dob.value,
       aadhar:            form.aadhar.value || undefined,
       occupation:        form.occupation.value,
@@ -177,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ok = true;
       } else {
         const data = await res.json().catch(() => ({}));
-        errMsg = data.detail || errMsg;
+        errMsg = formatApiError(data, errMsg);
       }
     } catch { /* network error — errMsg stays as generic fallback */ }
 
@@ -209,18 +291,32 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('feedbackForm')?.addEventListener('submit', async e => {
     e.preventDefault();
     const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
     const btn  = form.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+    let ok = false;
+    let errMsg = 'Something went wrong submitting your feedback. Please try again in a moment.';
     try {
-      await fetch(`${API_BASE}/feedback`, {
+      const res = await fetch(`${API_BASE}/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.fbname.value, email: form.fbemail.value, event: form.fbevent.value, message: form.fbmessage.value }),
       });
-    } catch {}
-    showToast('Thank you for your feedback! 🙏', 'success');
-    form.reset();
+      if (res.ok) {
+        ok = true;
+      } else {
+        const data = await res.json().catch(() => ({}));
+        errMsg = formatApiError(data, errMsg);
+      }
+    } catch { /* network error — errMsg stays as generic fallback */ }
+
+    if (ok) {
+      showToast('Thank you for your feedback! 🙏', 'success');
+      form.reset();
+    } else {
+      showToast(errMsg, 'error');
+    }
     btn.disabled = false;
     btn.textContent = 'Submit Feedback';
   });
@@ -534,11 +630,11 @@ document.addEventListener('DOMContentLoaded', function () {
     el.innerHTML = items.map((fb, i) => `
       <div class="postit" style="background:${POSTIT_COLORS[i % POSTIT_COLORS.length]};transform:rotate(${ROTATIONS[i % ROTATIONS.length]}deg);">
         <div class="postit-pin"></div>
-        <p class="postit-text">"${fb.message || fb.fbmessage || fb.feedback || ''}"</p>
         <div class="postit-meta">
-          <span class="postit-name">— ${fb.name || fb.fbname || 'Anonymous'}</span>
+          <span class="postit-name">${fb.name || fb.fbname || 'Anonymous'}</span>
           ${fb.event || fb.fbevent ? `<span class="postit-event">${fb.event || fb.fbevent}</span>` : ''}
         </div>
+        <p class="postit-text">"${fb.message || fb.fbmessage || fb.feedback || ''}"</p>
       </div>
     `).join('');
   }

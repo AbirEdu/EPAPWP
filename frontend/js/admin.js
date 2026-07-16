@@ -151,6 +151,17 @@ function showTab(tab, el) {
   if (tab === 'users')    loadUsers();
 }
 
+// Jump to a tab from a dashboard stat card, optionally pre-filtering the
+// members list (e.g. the "Pending" card should land on pending members).
+function goToTab(tab, statusFilter) {
+  showTab(tab, null);
+  if (tab === 'members' && statusFilter !== undefined) {
+    const filterEl = document.getElementById('statusFilter');
+    filterEl.value = statusFilter;
+    loadMembers();
+  }
+}
+
 function toggleSidebar() {
   document.getElementById('adminSidebar').classList.toggle('open');
 }
@@ -250,7 +261,7 @@ async function viewMember(id) {
       <div class="row g-3 p-2">
         <div class="col-md-6">
           <div class="detail-row"><span class="detail-label">Full Name</span><span class="detail-value">${m.name}</span></div>
-          <div class="detail-row"><span class="detail-label">Parent's Name</span><span class="detail-value">${m.parent_name}</span></div>
+          <div class="detail-row"><span class="detail-label">Parent's Name</span><span class="detail-value">${m.parent_name || '—'}</span></div>
           <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">${m.phone}</span></div>
           <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${m.email}</span></div>
           <div class="detail-row"><span class="detail-label">Age / DOB</span><span class="detail-value">${m.age} · ${m.dob}</span></div>

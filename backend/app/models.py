@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, validator, root_validator
 from typing import Optional, List
 from datetime import datetime
 
@@ -15,7 +15,7 @@ VALID_OCCUPATIONS = {"Student","Working Professional","Self Employed","Homemaker
 
 class MemberRegistration(BaseModel):
     name: str = Field(..., min_length=2, max_length=120)
-    parent_name: str = Field(..., min_length=2, max_length=120)
+    parent_name: Optional[str] = Field(None, min_length=2, max_length=120)
     phone: str = Field(..., min_length=10, max_length=15)
     email: EmailStr
     age: int = Field(..., ge=5, le=100)
@@ -38,6 +38,14 @@ class MemberRegistration(BaseModel):
     def validate_interests(cls, v):
         if v not in VALID_INTERESTS: raise ValueError(f"Invalid interest: {v}")
         return v
+
+    @root_validator
+    def validate_parent_name(cls, values):
+        age = values.get("age")
+        parent_name = values.get("parent_name")
+        if age is not None and age < 18 and not (parent_name and parent_name.strip()):
+            raise ValueError("Parent's/Guardian's Name is required for registrants under 18")
+        return values
 
 class MemberRegistrationOut(MemberRegistration):
     id: str

@@ -174,6 +174,15 @@ body { font-family: 'DM Sans', sans-serif; background: #f4f5f7; color: #1a1a1a; 
 .topbar-title { font-weight: 700; font-size: 1.05rem; flex: 1; }
 .topbar-right { font-size: 0.85rem; color: #666; }
 
+.btn-topbar-home {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+  color: #555; background: #f5f0eb; border: 1px solid #e5ddd4;
+  text-decoration: none; transition: all 0.2s;
+}
+.btn-topbar-home:hover { background: var(--crimson); color: #fff; border-color: var(--crimson); }
+
 .btn-sidebar-toggle { background: none; border: none; font-size: 1.4rem; color: #444; padding: 4px 8px; }
 
 /* Tab content */
@@ -187,6 +196,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f4f5f7; color: #1a1a1a; 
   display: flex; align-items: center; gap: 16px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   transition: transform 0.2s;
+  cursor: pointer;
 }
 
 .stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }

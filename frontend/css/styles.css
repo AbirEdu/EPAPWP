@@ -325,7 +325,6 @@ body {
 
 /* ===== ABOUT ===== */
 .about-lead {
-  font-family: 'Playfair Display', serif;
   font-size: 1.2rem;
   color: var(--text-dark);
   line-height: 1.7;
@@ -341,6 +340,10 @@ body {
   color: var(--gold);
   margin-top: 10px;
   margin-bottom: 0;
+}
+
+@media (max-width: 480px) {
+  .about-title-row { flex-wrap: wrap; row-gap: 8px; }
 }
 
 .about-subhead {
@@ -601,6 +604,9 @@ body {
 .contact-box h6 { color: #fff; font-weight: 700; margin-bottom: 6px; }
 .contact-box p { color: rgba(255,255,255,0.6); margin: 0; font-size: 0.9rem; }
 
+.contact-email-link { color: inherit; text-decoration: none; }
+.contact-email-link:hover { color: var(--gold); text-decoration: underline; }
+
 /* ===== FOOTER ===== */
 .footer { background: #0a0a12; color: #bbb; }
 
@@ -654,6 +660,9 @@ body {
 
 .footer-bottom a { color: #666; text-decoration: none; margin: 0 8px; }
 .footer-bottom a:hover { color: #bbb; }
+
+.footer-admin-link { color: #aaa; text-decoration: none; }
+.footer-admin-link:hover { color: var(--gold); }
 
 /* ===== REGISTRATION MODAL ===== */
 .register-modal {
@@ -1254,17 +1263,53 @@ body {
   }
 }
 
-/* ════ NAVBAR single-row layout ════ */
-nav#mainNav .navbar-collapse {
-  display: flex !important;
-  align-items: center !important;
+/* ════ NAVBAR single-row layout (desktop/tablet only — matches
+   navbar-expand-lg's own 992px breakpoint). Forcing this below 992px
+   defeats Bootstrap's mobile hamburger-collapse: the full link row stays
+   expanded, blows past #mainNav's height, and spills over the hero. ════ */
+@media (min-width: 992px) {
+  nav#mainNav .navbar-collapse {
+    display: flex !important;
+    align-items: center !important;
+  }
+  nav#mainNav .navbar-nav {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    width: 100%;
+    justify-content: center !important;
+  }
 }
-nav#mainNav .navbar-nav {
-  display: flex !important;
-  align-items: center !important;
-  flex-wrap: nowrap !important;
-  width: 100%;
-  justify-content: center !important;
+
+@media (max-width: 991px) {
+  /* Picture Wicture brand lives outside the collapsible menu, so it stays
+     visible even when the hamburger is closed — on phones it doesn't fit
+     next to the EPA brand + toggler and pushes the row into horizontal
+     overflow. It's still reachable via the "Picture Wicture Productions"
+     link inside the mobile menu, so just hide the standalone block. */
+  .nav-pw-brand-wrap { display: none !important; }
+  /* The brand row (logo/title/toggler) is a single flex row shared with the
+     collapsible menu. When the menu opens it must drop to its own full-width
+     line below that row, not squeeze in beside it — and #mainNav's
+     max-height:90px guard (for the closed state) must lift so the sticky
+     nav can grow instead of clipping/overlapping the hero below it. */
+  #mainNav > div { flex-wrap: wrap; }
+  #mainNav:has(.navbar-collapse.show) { max-height: none; }
+  nav#mainNav .navbar-collapse {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+  nav#mainNav .navbar-nav {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100%;
+    gap: 2px;
+    padding: 12px 0 4px;
+  }
+  nav#mainNav .navbar-nav .nav-link {
+    padding: 10px 4px !important;
+    border-bottom: 1px solid #f0ebe3;
+  }
 }
 nav#mainNav .navbar-nav .nav-link {
   display: inline-flex !important;
@@ -1641,8 +1686,18 @@ nav#mainNav .btn-join {
 .pwp-fc-name { color: rgba(255,255,255,0.9); font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.9rem; margin: 10px 0 3px; letter-spacing: 0.3px; white-space: nowrap; }
 .pwp-fc-role { color: var(--gold); font-size: 0.68rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; white-space: nowrap; }
 
+@media (max-width: 480px) {
+  .pwp-founders-row { flex-wrap: wrap; gap: 24px 16px; }
+  .pwp-fc-img-wrap { width: 88px; height: 88px; }
+}
+
 /* ════ FEEDBACK WALL ════ */
 .fbwall-layout { display: grid; grid-template-columns: 200px 1fr 200px; gap: 20px; align-items: stretch; margin-bottom: 40px; min-height: 420px; }
+@media (max-width: 768px) {
+  .fbwall-layout { grid-template-columns: 1fr; min-height: 0; }
+  .fbwall-videos { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .fbwall-videos .fbwall-video-card { flex: 0 0 200px; }
+}
 .fbwall-videos { display: flex; flex-direction: column; gap: 14px; }
 .fbwall-video-card { background: #1a1a2e; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: transform 0.2s; }
 .fbwall-video-card:hover { transform: scale(1.02); }
@@ -1651,12 +1706,28 @@ nav#mainNav .btn-join {
 .fbwall-video-name { display: block; font-size: 0.75rem; font-weight: 600; color: #fff; font-family: 'Playfair Display', serif; }
 .fbwall-video-event { display: block; font-size: 0.65rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 .fbwall-postits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 20px; background: #f5f0e8; border-radius: 16px; box-shadow: inset 0 2px 12px rgba(0,0,0,0.08); position: relative; min-height: 360px; align-items: center; align-content: center; height: 100%; }
-.postit { position: relative; padding: 22px 16px 16px; border-radius: 3px; box-shadow: 3px 4px 14px rgba(0,0,0,0.18); transition: transform 0.2s, box-shadow 0.2s; cursor: default; }
+.fbwall-postits::before {
+  content: "Voices of Our Patrons";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: clamp(1.4rem, 3.4vw, 2.6rem);
+  color: rgba(139,0,0,0.10);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+}
+.postit { position: relative; z-index: 1; padding: 22px 16px 16px; border-radius: 3px; box-shadow: 3px 4px 14px rgba(0,0,0,0.18); transition: transform 0.2s, box-shadow 0.2s; cursor: default; }
 .postit:hover { transform: scale(1.04) rotate(0deg) !important; box-shadow: 6px 8px 24px rgba(0,0,0,0.28); z-index: 2; }
 .postit-pin { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: radial-gradient(circle at 40% 35%, #ff6b6b, #c0392b); border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
-.postit-text { font-size: 0.82rem; color: #333; line-height: 1.6; font-family: 'DM Sans', sans-serif; margin: 0 0 10px; word-break: break-word; }
-.postit-meta { display: flex; flex-direction: column; gap: 2px; }
-.postit-name { font-size: 0.75rem; font-weight: 700; color: #555; font-family: 'Playfair Display', serif; }
+.postit-text { font-size: 0.82rem; color: #333; line-height: 1.6; font-family: 'DM Sans', sans-serif; margin: 0; word-break: break-word; }
+.postit-meta { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.postit-name { font-size: 0.8rem; font-weight: 700; color: #2a2a2a; font-family: 'DM Sans', sans-serif; letter-spacing: 0.2px; }
 .postit-event { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 .fbwall-loading { color: #aaa; font-size: 0.82rem; text-align: center; padding: 20px 0; }
 .fbwall-empty { grid-column: 1/-1; text-align: center; color: #aaa; padding: 40px 20px; }
