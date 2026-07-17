@@ -1286,19 +1286,26 @@ body {
   }
 }
 
-/* ════ NAVBAR single-row layout — custom breakpoint, NOT Bootstrap's
-   navbar-expand-lg (992px). The full nav (logo + 7 links + Admin + Join Us +
-   the Picture Wicture brand block) needs ~1715px of unbroken width; below
-   that it has nowhere to go but past the viewport edge, which made
-   position:fixed elements elsewhere on the page (e.g. the announcement
-   banner) look "off-center" because the page itself could scroll
-   horizontally while they couldn't. <nav id="mainNav"> intentionally has no
-   navbar-expand-* class — Bootstrap's canned breakpoints (max 1400px, xxl)
-   don't reach far enough, so both directions are handled with custom rules
-   here instead, including the toggler's visibility (normally Bootstrap's
-   job). Verified empirically: 1720px is the true minimum that avoids
-   horizontal overflow; 1750px keeps a small margin. ════ */
-@media (min-width: 1750px) {
+/* ════ NAVBAR single-row layout — custom breakpoints, NOT Bootstrap's
+   navbar-expand-lg (992px). <nav id="mainNav"> intentionally has no
+   navbar-expand-* class — Bootstrap's canned breakpoints don't land where
+   this nav actually needs them, so both directions are handled with custom
+   rules here, including the toggler's visibility (normally Bootstrap's job).
+
+   Two INDEPENDENT breakpoints, empirically measured:
+   - 1520px — the 7 nav links + Admin + Join Us + the Picture Wicture *icon*
+     (no text) fit in one row above this; below it they collapse to the
+     hamburger menu. (Verified minimum: 1505px; 1520px keeps a small margin.)
+   - 1750px — only above this is there enough room to ALSO show the full
+     "Picture Wicture Productions" text + tagline next to the icon.
+     (Verified minimum: 1720px.)
+
+   Critically, the Picture Wicture brand ICON is never fully hidden at any
+   width (see .nav-pw-brand-wrap below, and .pw-nav-text inside the 1749px
+   block) — it used to disappear below one shared 1750px breakpoint, which
+   is wider than nearly every real laptop screen, so most visitors never saw
+   the Picture Wicture logo/name at all. ════ */
+@media (min-width: 1520px) {
   nav#mainNav .navbar-toggler { display: none !important; }
   nav#mainNav .navbar-collapse {
     display: flex !important;
@@ -1314,15 +1321,8 @@ body {
   }
 }
 
-@media (max-width: 1749px) {
+@media (max-width: 1519px) {
   nav#mainNav .navbar-toggler { display: block !important; }
-  /* Picture Wicture brand lives outside the collapsible menu, so it stays
-     visible even when the hamburger is closed — below the breakpoint it
-     doesn't fit next to the EPA brand + toggler and pushes the row into
-     horizontal overflow. It's still reachable via the "Picture Wicture
-     Productions" link inside the mobile menu, so just hide the standalone
-     block. */
-  .nav-pw-brand-wrap { display: none !important; }
   /* The brand row (logo/title/toggler) is a single flex row shared with the
      collapsible menu. When the menu opens it must drop to its own full-width
      line below that row, not squeeze in beside it — and #mainNav's
@@ -1345,6 +1345,13 @@ body {
     padding: 10px 4px !important;
     border-bottom: 1px solid #f0ebe3;
   }
+}
+
+@media (max-width: 1749px) {
+  /* Below the full-branding breakpoint, keep just the Picture Wicture icon
+     visible (it's small — ~46px — and never the thing that causes overflow)
+     and drop the text block, which is what actually needs the extra room. */
+  .pw-nav-text { display: none !important; }
 }
 nav#mainNav .navbar-nav .nav-link {
   display: inline-flex !important;
@@ -2038,6 +2045,7 @@ nav#mainNav .btn-join {
 /* Hearts — classic CSS heart: a 45°-rotated square plus two circle
    pseudo-elements filling in the rounded lobes. */
 .eka-particle--hearts {
+  bottom: -20px; /* starts just below the visible area and rises through it, like balloons */
   width: 13px;
   height: 13px;
   background: var(--eka-color, #c9628a);
@@ -2152,10 +2160,12 @@ nav#mainNav .btn-join {
   }
 }
 
-@media (min-width: 1750px) {
-  /* Matches the navbar breakpoint above — only the fully inline desktop nav
-     (taller than the compact hamburger-row nav used below 1750px) needs the
-     badge pushed down further to clear it. */
+@media (min-width: 1520px) {
+  /* Matches the navbar's links-inline breakpoint above — only the fully
+     inline nav row (taller than the compact hamburger-row nav used below
+     1520px) needs the badge pushed down further to clear it. Independent of
+     the 1750px full-branding breakpoint, which doesn't change the nav's
+     height, just the Picture Wicture text's visibility. */
   .bday-badge { top: 100px; }
 }
 
