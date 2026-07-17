@@ -215,6 +215,14 @@ async def update_feedback_status(feedback_id: str, status: str, admin=Depends(re
     if r.matched_count == 0: raise HTTPException(404, "Not found")
     return {"message": f"Status → {status}"}
 
+@app.delete("/feedback/{feedback_id}", tags=["feedback"])
+async def delete_feedback(feedback_id: str, admin=Depends(require_admin)):
+    try: oid = ObjectId(feedback_id)
+    except: raise HTTPException(400, "Invalid ID")
+    r = await app.state.db.feedback.delete_one({"_id": oid})
+    if r.deleted_count == 0: raise HTTPException(404, "Not found")
+    return {"message": "Feedback deleted"}
+
 # VIDEO FEEDBACK
 VALID_VIDEO_STATUSES = {"pending", "approved", "rejected"}
 MAX_VIDEO_BYTES = 100 * 1024 * 1024  # 100MB
@@ -272,6 +280,14 @@ async def update_video_feedback_status(video_id: str, status: str, admin=Depends
     r = await app.state.db.video_feedback.update_one({"_id": oid}, {"$set": {"status": status}})
     if r.matched_count == 0: raise HTTPException(404, "Not found")
     return {"message": f"Status → {status}"}
+
+@app.delete("/feedback/video/{video_id}", tags=["feedback"])
+async def delete_video_feedback(video_id: str, admin=Depends(require_admin)):
+    try: oid = ObjectId(video_id)
+    except: raise HTTPException(400, "Invalid ID")
+    r = await app.state.db.video_feedback.delete_one({"_id": oid})
+    if r.deleted_count == 0: raise HTTPException(404, "Not found")
+    return {"message": "Video feedback deleted"}
 
 # CAROUSEL (homepage hero content management)
 MAX_POSTER_BYTES = 4 * 1024 * 1024  # 4MB

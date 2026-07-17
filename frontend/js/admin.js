@@ -323,6 +323,7 @@ async function loadFeedback() {
         <div class="d-flex gap-1 mt-2">
           ${f.status !== 'approved' ? `<button class="btn-sm-action btn-approve" onclick="setFeedbackStatus('${f.id}','approved',this)">Approve</button>` : ''}
           ${f.status !== 'rejected' ? `<button class="btn-sm-action btn-inactive" onclick="setFeedbackStatus('${f.id}','rejected',this)">Reject</button>` : ''}
+          <button class="btn-sm-action btn-inactive" onclick="deleteFeedback('${f.id}')">Delete</button>
         </div>
       </div>`).join('') : '<p class="text-muted text-center py-4">No feedback yet.</p>';
   } catch (err) {
@@ -339,6 +340,19 @@ async function setFeedbackStatus(id, status, btn) {
   } catch (err) {
     showToast(err.message, 'danger');
     btn.disabled = false;
+  }
+}
+
+async function deleteFeedback(id) {
+  if (!confirm("Delete this feedback? This can't be undone.")) return;
+  try {
+    const token = getToken();
+    const res = await fetch(`${API}/feedback/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.detail || `HTTP ${res.status}`); }
+    showToast('Feedback deleted', 'success');
+    loadFeedback();
+  } catch (err) {
+    showToast(err.message, 'danger');
   }
 }
 
@@ -363,6 +377,7 @@ async function loadVideoFeedback() {
         <div class="d-flex gap-1 mt-2">
           ${f.status !== 'approved' ? `<button class="btn-sm-action btn-approve" onclick="setVideoFeedbackStatus('${f.id}','approved',this)">Approve</button>` : ''}
           ${f.status !== 'rejected' ? `<button class="btn-sm-action btn-inactive" onclick="setVideoFeedbackStatus('${f.id}','rejected',this)">Reject</button>` : ''}
+          <button class="btn-sm-action btn-inactive" onclick="deleteVideoFeedback('${f.id}')">Delete</button>
         </div>
       </div>`).join('') : '<p class="text-muted text-center py-4">No video feedback yet.</p>';
   } catch (err) {
@@ -379,6 +394,19 @@ async function setVideoFeedbackStatus(id, status, btn) {
   } catch (err) {
     showToast(err.message, 'danger');
     btn.disabled = false;
+  }
+}
+
+async function deleteVideoFeedback(id) {
+  if (!confirm("Delete this video feedback? This can't be undone.")) return;
+  try {
+    const token = getToken();
+    const res = await fetch(`${API}/feedback/video/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.detail || `HTTP ${res.status}`); }
+    showToast('Video feedback deleted', 'success');
+    loadVideoFeedback();
+  } catch (err) {
+    showToast(err.message, 'danger');
   }
 }
 
