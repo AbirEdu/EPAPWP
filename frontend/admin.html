@@ -160,13 +160,90 @@
 
       <!-- CAROUSEL / CONTENT TAB -->
       <div id="tab-carousel" class="tab-pane d-none">
-        <div class="admin-card">
+        <div class="admin-card mb-4">
+          <div class="admin-card-header">
+            <h6><i class="bi bi-megaphone me-1"></i>Announcement Banner <span class="text-muted fw-normal" style="font-size:0.72rem;">— floating badge shown on the homepage</span></h6>
+          </div>
+          <div class="admin-card-body">
+            <form id="announcementForm">
+              <div class="mb-3">
+                <label class="form-label">Message</label>
+                <textarea class="form-control" name="message" rows="2" maxlength="200" placeholder="e.g. Celebrating 10 Years of Ekalavya Performing Arts!" required></textarea>
+                <div class="form-text">Shown once per visitor until dismissed; editing the message re-shows it to everyone.</div>
+              </div>
+              <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                  <label class="form-label">Effect</label>
+                  <select class="form-select" name="effect">
+                    <option value="balloons">🎈 Balloons</option>
+                    <option value="sparkle">✨ Sparkle</option>
+                    <option value="rain">🌧️ Rain</option>
+                    <option value="confetti">🎉 Party Popper</option>
+                    <option value="snow">❄️ Snow Fall</option>
+                    <option value="crackers">🎆 Crackers</option>
+                    <option value="hearts">💕 Hearts</option>
+                    <option value="none">📢 None (message only)</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="announcementActiveCheck" name="active" checked>
+                    <label class="form-check-label" for="announcementActiveCheck">Show on homepage</label>
+                  </div>
+                </div>
+              </div>
+              <div id="announcementAlert" class="alert d-none py-2 small mt-3 mb-0"></div>
+              <button type="submit" class="btn btn-crimson mt-3" id="announcementSubmitBtn">Save Announcement</button>
+            </form>
+          </div>
+        </div>
+        <div class="admin-card mb-4">
           <div class="admin-card-header">
             <h6>Homepage Carousel <span class="text-muted fw-normal" style="font-size:0.72rem;">— 2–8 live slides recommended</span></h6>
             <button class="btn btn-sm btn-crimson" onclick="openSlideForm()"><i class="bi bi-plus-lg"></i> Add Slide</button>
           </div>
           <div class="admin-card-body">
             <div id="carouselSlidesGrid" class="carousel-admin-grid">Loading...</div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h6><i class="bi bi-play-btn me-1"></i>Recent Performances <span class="text-muted fw-normal" style="font-size:0.72rem;">— shown on the homepage, 6 per page</span></h6>
+          </div>
+          <div class="admin-card-body">
+            <form id="performanceForm" class="mb-4">
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">Title <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="title" placeholder="e.g. Kalakriti 2026" required minlength="2">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Category <span class="text-danger">*</span></label>
+                  <select class="form-select" name="category" required>
+                    <option value="EPA">Ekalavya Performing Arts</option>
+                    <option value="PWP">Picture Wicture Productions</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">YouTube URL <span class="text-danger">*</span></label>
+                  <input type="url" class="form-control" name="youtube_url" placeholder="https://www.youtube.com/watch?v=..." required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Location</label>
+                  <input type="text" class="form-control" name="location" placeholder="e.g. Bengaluru">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Description</label>
+                  <input type="text" class="form-control" name="description" maxlength="500" placeholder="One line about the video">
+                </div>
+              </div>
+              <div id="performanceFormAlert" class="alert d-none py-2 small mt-3 mb-0"></div>
+              <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-crimson" id="performanceSubmitBtn"><i class="bi bi-plus-lg"></i> Add Performance</button>
+                <button type="button" class="btn btn-outline-secondary d-none" id="performanceCancelBtn" onclick="cancelPerformanceEdit()">Cancel</button>
+              </div>
+            </form>
+            <div id="performancesAdminGrid" class="carousel-admin-grid">Loading...</div>
           </div>
         </div>
       </div>

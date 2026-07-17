@@ -563,6 +563,19 @@ body {
 
 .perf-venue { font-size: 0.78rem; color: var(--crimson); font-weight: 600; }
 
+.perf-category {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-top: 8px;
+}
+.perf-category.cat-epa { background: rgba(139,0,0,0.1); color: var(--crimson); }
+.perf-category.cat-pwp { background: rgba(212,160,23,0.18); color: #8a6100; }
+
 /* ===== FEEDBACK ===== */
 .feedback-form .form-control, .feedback-form .form-select {
   border: 1.5px solid #e0d8d0;
@@ -1273,17 +1286,27 @@ body {
   }
 }
 
-/* ════ NAVBAR single-row layout (desktop/tablet only — matches
-   navbar-expand-lg's own 992px breakpoint). Forcing this below 992px
-   defeats Bootstrap's mobile hamburger-collapse: the full link row stays
-   expanded, blows past #mainNav's height, and spills over the hero. ════ */
-@media (min-width: 992px) {
+/* ════ NAVBAR single-row layout — custom breakpoint, NOT Bootstrap's
+   navbar-expand-lg (992px). The full nav (logo + 7 links + Admin + Join Us +
+   the Picture Wicture brand block) needs ~1715px of unbroken width; below
+   that it has nowhere to go but past the viewport edge, which made
+   position:fixed elements elsewhere on the page (e.g. the announcement
+   banner) look "off-center" because the page itself could scroll
+   horizontally while they couldn't. <nav id="mainNav"> intentionally has no
+   navbar-expand-* class — Bootstrap's canned breakpoints (max 1400px, xxl)
+   don't reach far enough, so both directions are handled with custom rules
+   here instead, including the toggler's visibility (normally Bootstrap's
+   job). Verified empirically: 1720px is the true minimum that avoids
+   horizontal overflow; 1750px keeps a small margin. ════ */
+@media (min-width: 1750px) {
+  nav#mainNav .navbar-toggler { display: none !important; }
   nav#mainNav .navbar-collapse {
     display: flex !important;
     align-items: center !important;
   }
   nav#mainNav .navbar-nav {
     display: flex !important;
+    flex-direction: row !important; /* Bootstrap's own base .navbar-nav rule is flex-direction:column (mobile-first); that's normally flipped to row by .navbar-expand-lg's own min-width media query, which no longer applies since this nav has no navbar-expand-* class */
     align-items: center !important;
     flex-wrap: nowrap !important;
     width: 100%;
@@ -1291,12 +1314,14 @@ body {
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1749px) {
+  nav#mainNav .navbar-toggler { display: block !important; }
   /* Picture Wicture brand lives outside the collapsible menu, so it stays
-     visible even when the hamburger is closed — on phones it doesn't fit
-     next to the EPA brand + toggler and pushes the row into horizontal
-     overflow. It's still reachable via the "Picture Wicture Productions"
-     link inside the mobile menu, so just hide the standalone block. */
+     visible even when the hamburger is closed — below the breakpoint it
+     doesn't fit next to the EPA brand + toggler and pushes the row into
+     horizontal overflow. It's still reachable via the "Picture Wicture
+     Productions" link inside the mobile menu, so just hide the standalone
+     block. */
   .nav-pw-brand-wrap { display: none !important; }
   /* The brand row (logo/title/toggler) is a single flex row shared with the
      collapsible menu. When the menu opens it must drop to its own full-width
@@ -1559,6 +1584,14 @@ nav#mainNav .btn-join {
   display: block;
 }
 
+/* Mirror the live self-view only, like a selfie camera, so it feels natural
+   while recording. The actual recorded/uploaded video (and its playback
+   preview below) is untouched — MediaRecorder captures the raw stream, this
+   is a display-only CSS transform. */
+#videoPreview {
+  transform: scaleX(-1);
+}
+
 /* Centred placeholder with icon */
 .video-placeholder {
   text-align: center;
@@ -1625,6 +1658,43 @@ nav#mainNav .btn-join {
   50% { opacity:0.4; transform:scale(0.85); }
 }
 
+/* Pre-roll countdown shown over the live preview before recording actually
+   starts, so the mic/camera light coming on doesn't catch anyone off guard. */
+.rec-countdown {
+  position: absolute;
+  inset: 0;
+  background: rgba(15,15,26,0.72);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 6;
+  color: #fff;
+  text-align: center;
+}
+.rec-countdown-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+}
+.rec-countdown-num {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #d4a017;
+  animation: countdownPop 1s ease-out;
+}
+@keyframes countdownPop {
+  0%   { transform: scale(1.6); opacity: 0; }
+  40%  { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* ═══ ICON BUTTONS ═══ */
 .video-icon-bar {
   display: flex;
@@ -1677,6 +1747,7 @@ nav#mainNav .btn-join {
     background: linear-gradient(to right, transparent, #e8e2da 15%, #e8e2da 85%, transparent);
   }
   .vid-icon-btn { width: 50px; height: 50px; font-size: 1.4rem; }
+  .rec-countdown-num { font-size: 3rem; }
 }
 
 /* ════ PWP FOUNDER CARDS — ROUND COMPACT ════ */
@@ -1717,7 +1788,7 @@ nav#mainNav .btn-join {
 .fbwall-video-event { display: block; font-size: 0.65rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 .fbwall-postits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 20px; background: #f5f0e8; border-radius: 16px; box-shadow: inset 0 2px 12px rgba(0,0,0,0.08); position: relative; min-height: 360px; align-items: center; align-content: center; height: 100%; }
 .fbwall-postits::before {
-  content: "Voices of Our Patrons";
+  content: "Wall of Applause";
   position: absolute;
   top: 18px;
   left: 50%;
@@ -1814,10 +1885,11 @@ nav#mainNav .btn-join {
   transform: translateY(3px);
 }
 
-/* ═══ 10TH ANNIVERSARY OVERLAY ═══
-   Transparent fixed layer above the page. Balloons are purely decorative
-   (pointer-events: none) so nothing underneath is ever blocked; only the
-   small badge itself is clickable, for the close button. */
+/* ═══ ANNOUNCEMENT BANNER ═══
+   Transparent fixed layer above the page, content set by script.js from
+   GET /announcement (admin-managed, Content tab). Particle effects are
+   purely decorative (pointer-events: none) so nothing underneath is ever
+   blocked; only the small badge itself is clickable, for the close button. */
 .bday-overlay {
   position: fixed;
   inset: 0;
@@ -1828,19 +1900,25 @@ nav#mainNav .btn-join {
 }
 .bday-overlay.bday-overlay-hide { opacity: 0; }
 
-.bday-balloons { position: absolute; inset: 0; overflow: hidden; }
+.bday-effect-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 
-.balloon {
-  position: absolute;
+/* Shared particle base — script.js appends one <span class="eka-particle
+   eka-particle--{effect}"> per particle, with randomized left/animation-delay/
+   animation-duration set inline so no two runs look identical. */
+.eka-particle { position: absolute; pointer-events: none; opacity: 0; will-change: transform, opacity; }
+
+/* Balloons */
+.eka-particle--balloons {
   bottom: -160px;
-  width: 44px;
-  height: 56px;
+  width: 42px;
+  height: 54px;
   border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
-  opacity: 0;
-  pointer-events: none;
-  animation: balloonRise linear infinite;
+  background: radial-gradient(circle at 34% 28%, var(--eka-color-light, #f4cf6b), var(--eka-color, #b8860b) 72%);
+  animation-name: balloonRise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
-.balloon::before { /* knot */
+.eka-particle--balloons::before { /* knot */
   content: "";
   position: absolute;
   bottom: -6px;
@@ -1849,9 +1927,9 @@ nav#mainNav .btn-join {
   width: 0; height: 0;
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-top: 6px solid currentColor;
+  border-top: 6px solid var(--eka-color, #b8860b);
 }
-.balloon::after { /* string */
+.eka-particle--balloons::after { /* string */
   content: "";
   position: absolute;
   top: 100%;
@@ -1860,16 +1938,6 @@ nav#mainNav .btn-join {
   height: 64px;
   background: rgba(40,30,20,0.22);
 }
-
-.bday-b1 { left: 6%;  color: #8B0000; background: radial-gradient(circle at 34% 28%, #d96a6a, #8B0000 72%); animation-duration: 15s; animation-delay: 0s; }
-.bday-b2 { left: 18%; color: #d4a017; background: radial-gradient(circle at 34% 28%, #f4cf6b, #b8860b 72%); width: 38px; height: 48px; animation-duration: 12.5s; animation-delay: 2.4s; }
-.bday-b3 { left: 30%; color: #2f7d6b; background: radial-gradient(circle at 34% 28%, #5fae9a, #235c4e 72%); animation-duration: 17s; animation-delay: 5.1s; }
-.bday-b4 { left: 44%; color: #c9628a; background: radial-gradient(circle at 34% 28%, #f0a5be, #b1486c 72%); width: 40px; height: 50px; animation-duration: 13.5s; animation-delay: 1.2s; }
-.bday-b5 { left: 58%; color: #8B0000; background: radial-gradient(circle at 34% 28%, #d96a6a, #8B0000 72%); width: 36px; height: 46px; animation-duration: 16s; animation-delay: 7s; }
-.bday-b6 { left: 71%; color: #d4a017; background: radial-gradient(circle at 34% 28%, #f4cf6b, #b8860b 72%); animation-duration: 14s; animation-delay: 3.6s; }
-.bday-b7 { left: 84%; color: #2f7d6b; background: radial-gradient(circle at 34% 28%, #5fae9a, #235c4e 72%); width: 40px; height: 50px; animation-duration: 18s; animation-delay: 8.4s; }
-.bday-b8 { left: 93%; color: #c9628a; background: radial-gradient(circle at 34% 28%, #f0a5be, #b1486c 72%); width: 34px; height: 44px; animation-duration: 12s; animation-delay: 4.8s; }
-
 @keyframes balloonRise {
   0%   { transform: translate(0, 0) rotate(-3deg); opacity: 0; }
   8%   { opacity: 0.9; }
@@ -1880,60 +1948,219 @@ nav#mainNav .btn-join {
   100% { transform: translate(-10px, -114vh) rotate(-2deg); opacity: 0; }
 }
 
+/* Sparkle */
+.eka-particle--sparkle {
+  top: -10px;
+  width: 7px;
+  height: 7px;
+  background: radial-gradient(circle, #fff, var(--eka-color, #f0c040) 70%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 8px 2px rgba(240,192,64,0.55);
+  animation-name: sparkleTwinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.4); }
+  50%      { opacity: 1; transform: translateY(40vh) scale(1.3); }
+}
+
+/* Rain */
+.eka-particle--rain {
+  top: -40px;
+  width: 2px;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, rgba(120,170,220,0.8));
+  animation-name: rainFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes rainFall {
+  0%   { transform: translateY(0); opacity: 0; }
+  8%   { opacity: 0.85; }
+  100% { transform: translateY(112vh); opacity: 0.2; }
+}
+
+/* Confetti (party popper) */
+.eka-particle--confetti {
+  top: -20px;
+  width: 9px;
+  height: 14px;
+  background: var(--eka-color, #d4a017);
+  animation-name: confettiFall;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+  8%   { opacity: 1; }
+  100% { transform: translateY(112vh) rotate(560deg); opacity: 0.9; }
+}
+
+/* Snow */
+.eka-particle--snow {
+  top: -14px;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(255,255,255,0.85);
+  animation-name: snowFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes snowFall {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  8%   { opacity: 0.9; }
+  50%  { transform: translate(14px, 55vh); }
+  100% { transform: translate(-10px, 114vh); opacity: 0.3; }
+}
+
+/* Crackers (fireworks) — script.js positions each spark at its burst's
+   origin (left/top) and sets --eka-dx/--eka-dy to the burst-relative
+   endpoint; several sparks sharing one origin + delay read as one firework. */
+.eka-particle--crackers {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--eka-color, #d4a017);
+  box-shadow: 0 0 6px 2px var(--eka-color, #d4a017);
+  animation-name: crackerBurst;
+  animation-timing-function: cubic-bezier(0.15, 0.65, 0.35, 1);
+  animation-iteration-count: infinite;
+}
+@keyframes crackerBurst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+  8%   { opacity: 1; }
+  100% { transform: translate(var(--eka-dx, 0px), var(--eka-dy, 0px)) scale(0.15); opacity: 0; }
+}
+
+/* Hearts — classic CSS heart: a 45°-rotated square plus two circle
+   pseudo-elements filling in the rounded lobes. */
+.eka-particle--hearts {
+  width: 13px;
+  height: 13px;
+  background: var(--eka-color, #c9628a);
+  animation-name: heartsFloat;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+.eka-particle--hearts::before,
+.eka-particle--hearts::after {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--eka-color, #c9628a);
+}
+.eka-particle--hearts::before { top: -6.5px; left: 0; }
+.eka-particle--hearts::after  { top: 0; left: -6.5px; }
+@keyframes heartsFloat {
+  0%   { transform: translate(0, 0) rotate(45deg) scale(0.5); opacity: 0; }
+  10%  { opacity: 0.95; }
+  50%  { transform: translate(14px, -50vh) rotate(45deg) scale(1); }
+  100% { transform: translate(-10px, -102vh) rotate(45deg) scale(0.7); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .balloon { display: none; }
+  .eka-particle { display: none; }
 }
 
 .bday-badge {
   position: fixed;
   top: 66px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%); /* fallback for prefers-reduced-motion, where bdayPulseScale (the only other source of this transform) is disabled below */
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.94);
+  gap: 12px;
+  background: linear-gradient(135deg, #fffdf5, #fff6dc);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  border: 1.5px solid var(--gold);
+  border: 3px solid var(--gold);
   border-radius: 100px;
-  padding: 9px 40px 9px 16px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 14px 52px 14px 22px;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.2), 0 0 0 5px rgba(212,160,23,0.16), 0 0 22px rgba(212,160,23,0.3);
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--text-dark);
   max-width: calc(100vw - 32px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  animation: bdayColorCycle 4.5s ease-in-out infinite, bdayPulseScale 2.4s ease-in-out infinite;
 }
-.bday-badge-emoji { flex-shrink: 0; }
-.bday-badge-text strong { color: var(--crimson); }
+.bday-badge::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 35%;
+  height: 220%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.85), transparent);
+  transform: rotate(20deg);
+  animation: bdayShimmer 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.bday-badge-emoji { flex-shrink: 0; font-size: 1.4em; display: inline-block; animation: bdayEmojiWiggle 1.8s ease-in-out infinite; }
+
+@keyframes bdayColorCycle {
+  0%, 100% { border-color: var(--gold);    box-shadow: 0 10px 34px rgba(0,0,0,0.2), 0 0 0 6px rgba(212,160,23,0.22), 0 0 26px rgba(212,160,23,0.45); }
+  33%      { border-color: var(--crimson); box-shadow: 0 10px 34px rgba(0,0,0,0.2), 0 0 0 6px rgba(139,0,0,0.22),   0 0 26px rgba(139,0,0,0.45); }
+  66%      { border-color: #2f7d6b;        box-shadow: 0 10px 34px rgba(0,0,0,0.2), 0 0 0 6px rgba(47,125,107,0.22), 0 0 26px rgba(47,125,107,0.45); }
+}
+
+@keyframes bdayPulseScale {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.035); }
+}
+
+@keyframes bdayShimmer {
+  0%, 15% { left: -60%; }
+  85%, 100% { left: 130%; }
+}
+
+@keyframes bdayEmojiWiggle {
+  0%, 100% { transform: rotate(-10deg); }
+  50%      { transform: rotate(10deg); }
+}
 
 .bday-close {
   position: absolute;
-  right: 8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px; height: 22px;
+  width: 26px; height: 26px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,0.06);
-  color: #555;
-  font-size: 1.05rem;
+  background: rgba(212,160,23,0.18);
+  color: var(--gold);
+  font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s, color 0.15s;
+  z-index: 1;
 }
-.bday-close:hover { background: rgba(139,0,0,0.14); color: var(--crimson); }
+.bday-close:hover { background: var(--crimson); color: #fff; }
 
-@media (min-width: 992px) {
+@media (prefers-reduced-motion: reduce) {
+  .bday-badge, .bday-badge::before, .bday-badge-emoji {
+    animation: none;
+  }
+}
+
+@media (min-width: 1750px) {
+  /* Matches the navbar breakpoint above — only the fully inline desktop nav
+     (taller than the compact hamburger-row nav used below 1750px) needs the
+     badge pushed down further to clear it. */
   .bday-badge { top: 100px; }
 }
 
 @media (max-width: 480px) {
-  .bday-badge { font-size: 0.75rem; padding: 8px 34px 8px 12px; gap: 6px; }
-  .balloon { width: 34px; height: 44px; }
+  .bday-badge { font-size: 0.85rem; padding: 11px 40px 11px 16px; gap: 8px; }
+  .bday-badge-emoji { font-size: 1.2em; }
+  .eka-particle--balloons { width: 34px; height: 44px; }
 }

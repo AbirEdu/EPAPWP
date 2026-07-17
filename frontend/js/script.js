@@ -88,21 +88,156 @@ function escapeHtml(str) {
 })();
 
 // ══════════════════════════════════════════
-// 10TH ANNIVERSARY OVERLAY — dismiss once, remembered per visitor
+// RECENT PERFORMANCES — admin-managed (Content tab in the admin panel).
+// Falls back to the static cards already in the HTML below if the API
+// returns none. Paginates 6 per page once there are more than that.
 // ══════════════════════════════════════════
-(function () {
-  const DISMISS_KEY = 'eka_bday10_dismissed';
+(async function loadPerformances() {
+  const CATEGORY_LABELS = { EPA: 'Ekalavya Performing Arts', PWP: 'Picture Wicture Productions' };
+  const PER_PAGE = 6;
+  let items = [];
+  let page = 0;
+
+  function renderPage() {
+    const grid = document.getElementById('performancesGrid');
+    const totalPages = Math.max(1, Math.ceil(items.length / PER_PAGE));
+    page = Math.min(page, totalPages - 1);
+    const pageItems = items.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
+
+    grid.innerHTML = pageItems.map(p => {
+      const desc = p.description ? `<p>${escapeHtml(p.description)}</p>` : '';
+      const location = p.location ? `<span class="perf-venue"><i class="bi bi-geo-alt"></i> ${escapeHtml(p.location)}</span>` : '';
+      const catClass = p.category === 'PWP' ? 'cat-pwp' : 'cat-epa';
+      return `
+        <div class="col-md-6 col-lg-4"><div class="perf-card">
+          <div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/${encodeURIComponent(p.youtube_video_id)}" title="${escapeHtml(p.title)}" allowfullscreen></iframe></div>
+          <div class="perf-info">
+            <h5>${escapeHtml(p.title)}</h5>
+            ${desc}
+            ${location}
+            <span class="perf-category ${catClass}">${escapeHtml(CATEGORY_LABELS[p.category] || p.category)}</span>
+          </div>
+        </div></div>`;
+    }).join('');
+
+    const pagination = document.getElementById('performancesPagination');
+    pagination.classList.toggle('d-none', items.length <= PER_PAGE);
+    document.getElementById('perfPageIndicator').textContent = `${page + 1} / ${totalPages}`;
+    document.getElementById('perfPrev').disabled = page === 0;
+    document.getElementById('perfNext').disabled = page >= totalPages - 1;
+  }
+
+  document.getElementById('perfPrev')?.addEventListener('click', () => { if (page > 0) { page--; renderPage(); } });
+  document.getElementById('perfNext')?.addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(items.length / PER_PAGE));
+    if (page < totalPages - 1) { page++; renderPage(); }
+  });
+
+  try {
+    const res = await fetch(`${API_BASE}/performances`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return;
+    items = data;
+    renderPage();
+  } catch { /* network/parse error — keep the static fallback cards */ }
+})();
+
+// ══════════════════════════════════════════
+// ANNOUNCEMENT BANNER — admin-managed (Content tab in the admin panel).
+// Fetches GET /announcement; if active with a message, renders the chosen
+// particle effect and shows the badge. Dismissal is remembered per visitor
+// keyed by the message text itself, so editing the message re-shows the
+// banner even to people who already dismissed the old one.
+// ══════════════════════════════════════════
+(async function loadAnnouncementBanner() {
+  const DISMISS_KEY = 'eka_announcement_dismissed';
   const overlay = document.getElementById('bdayOverlay');
   if (!overlay) return;
-  if (localStorage.getItem(DISMISS_KEY) === 'true') {
-    overlay.remove();
-    return;
+
+  const EFFECT_EMOJI = { balloons: '🎈', sparkle: '✨', rain: '🌧️', confetti: '🎉', snow: '❄️', crackers: '🎆', hearts: '💕', none: '📢' };
+  const EFFECT_PARTICLE_COUNT = { balloons: 8, sparkle: 24, rain: 40, confetti: 30, snow: 26, hearts: 20 };
+  const PARTICLE_COLORS = ['#8B0000', '#d4a017', '#2f7d6b', '#c9628a', '#3a6ea5'];
+
+  function renderParticles(effect) {
+    const layer = document.getElementById('bdayEffectLayer');
+    if (!layer) return;
+    if (effect === 'crackers') { renderCrackerBursts(layer); return; }
+    const count = EFFECT_PARTICLE_COUNT[effect] || 0;
+    if (count === 0) return;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('span');
+      el.className = `eka-particle eka-particle--${effect}`;
+      el.style.left = `${Math.random() * 100}%`;
+      el.style.animationDelay = `${(Math.random() * 6).toFixed(2)}s`;
+      el.style.animationDuration = `${(6 + Math.random() * 8).toFixed(2)}s`;
+      if (effect === 'balloons' || effect === 'confetti' || effect === 'hearts') {
+        const color = PARTICLE_COLORS[i % PARTICLE_COLORS.length];
+        el.style.setProperty('--eka-color', color);
+        el.style.setProperty('--eka-color-light', color);
+      }
+      frag.appendChild(el);
+    }
+    layer.appendChild(frag);
   }
-  window.dismissBdayOverlay = function () {
-    localStorage.setItem(DISMISS_KEY, 'true');
-    overlay.classList.add('bday-overlay-hide');
-    setTimeout(() => overlay.remove(), 400);
-  };
+
+  // Fireworks: several bursts, each a ring of sparks sharing one origin point
+  // and one animation delay — --eka-dx/--eka-dy (per-spark endpoint offsets)
+  // are what makes them radiate outward instead of just drifting like the
+  // other effects.
+  function renderCrackerBursts(layer) {
+    const BURSTS = 6;
+    const SPARKS_PER_BURST = 12;
+    const frag = document.createDocumentFragment();
+    for (let b = 0; b < BURSTS; b++) {
+      const originLeft = 10 + Math.random() * 80;
+      const originTop = 10 + Math.random() * 40;
+      const delay = (b * 1.4 + Math.random() * 0.6).toFixed(2);
+      const duration = (1.1 + Math.random() * 0.4).toFixed(2);
+      const color = PARTICLE_COLORS[b % PARTICLE_COLORS.length];
+      for (let s = 0; s < SPARKS_PER_BURST; s++) {
+        const angle = (360 / SPARKS_PER_BURST) * s + (Math.random() * 12 - 6);
+        const dist = 45 + Math.random() * 35;
+        const rad = angle * Math.PI / 180;
+        const el = document.createElement('span');
+        el.className = 'eka-particle eka-particle--crackers';
+        el.style.left = `${originLeft}%`;
+        el.style.top = `${originTop}%`;
+        el.style.animationDelay = `${delay}s`;
+        el.style.animationDuration = `${duration}s`;
+        el.style.setProperty('--eka-color', color);
+        el.style.setProperty('--eka-dx', `${(Math.cos(rad) * dist).toFixed(1)}px`);
+        el.style.setProperty('--eka-dy', `${(Math.sin(rad) * dist).toFixed(1)}px`);
+        frag.appendChild(el);
+      }
+    }
+    layer.appendChild(frag);
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/announcement`);
+    if (!res.ok) { overlay.remove(); return; }
+    const cfg = await res.json();
+    if (!cfg || !cfg.active || !cfg.message) { overlay.remove(); return; }
+    // Fingerprint includes updated_at, not just the message text, so any
+    // admin Save — even re-activating with the exact same wording — clears
+    // prior dismissals instead of staying hidden for people who saw it before.
+    const fingerprint = `${cfg.updated_at || ''}|${cfg.message}`;
+    if (localStorage.getItem(DISMISS_KEY) === fingerprint) { overlay.remove(); return; }
+
+    document.getElementById('bdayBadgeText').textContent = cfg.message;
+    document.getElementById('bdayBadgeEmoji').textContent = EFFECT_EMOJI[cfg.effect] || '📢';
+    renderParticles(cfg.effect);
+
+    window.dismissBdayOverlay = function () {
+      localStorage.setItem(DISMISS_KEY, fingerprint);
+      overlay.classList.add('bday-overlay-hide');
+      setTimeout(() => overlay.remove(), 400);
+    };
+  } catch {
+    overlay.remove();
+  }
 })();
 
 // ══════════════════════════════════════════
@@ -452,7 +587,9 @@ let recordedBlob = null;
 let stream = null;
 let recordTimer = null;
 let recordSeconds = 0;
+let countdownTimer = null;
 const MAX_SECONDS = 120; // 2-minute limit
+const COUNTDOWN_SECONDS = 5;
 
 window.startRecording = async function () {
   const status = document.getElementById('videoStatus');
@@ -469,13 +606,51 @@ window.startRecording = async function () {
   preview.classList.remove('d-none');
   preview.srcObject = stream;
 
+  // Hide the record button immediately so it can't be double-clicked while
+  // the pre-roll countdown is running (mediaRecorder doesn't exist yet).
+  document.getElementById('btnRecord').classList.add('d-none');
+  status.textContent = 'Get ready...';
+
+  runCountdown(COUNTDOWN_SECONDS, beginActualRecording);
+};
+
+function runCountdown(seconds, onDone) {
+  const overlay = document.getElementById('recCountdown');
+  const numEl = document.getElementById('recCountdownNum');
+  let remaining = seconds;
+
+  overlay.classList.remove('d-none');
+  numEl.textContent = remaining;
+  restartCountdownPop(numEl);
+
+  countdownTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+      overlay.classList.add('d-none');
+      onDone();
+      return;
+    }
+    numEl.textContent = remaining;
+    restartCountdownPop(numEl);
+  }, 1000);
+}
+
+function restartCountdownPop(el) {
+  el.style.animation = 'none';
+  void el.offsetWidth; // force reflow so the animation replays each tick
+  el.style.animation = '';
+}
+
+function beginActualRecording() {
+  const status = document.getElementById('videoStatus');
   recordedChunks = [];
   mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
   mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
   mediaRecorder.onstop = handleRecordingStop;
   mediaRecorder.start();
 
-  document.getElementById('btnRecord').classList.add('d-none');
   document.getElementById('btnStop').classList.remove('d-none');
   document.getElementById('btnRetake').classList.add('d-none');
   document.getElementById('btnSend').classList.add('d-none');
@@ -490,7 +665,7 @@ window.startRecording = async function () {
   }, 1000);
 
   status.textContent = '\ud83d\udd34 Recording...';
-};
+}
 
 window.stopRecording = function () {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
@@ -570,6 +745,7 @@ window.sendVideo = async function () {
 
 function resetVideoUI() {
   if (recordTimer) { clearInterval(recordTimer); recordTimer = null; }
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
   cleanupStream();
   recordedBlob = null;
   recordedChunks = [];
@@ -579,6 +755,7 @@ function resetVideoUI() {
   document.getElementById('videoPreview').classList.add('d-none');
   document.getElementById('videoPlayback').classList.add('d-none');
   document.getElementById('recIndicator').classList.add('d-none');
+  document.getElementById('recCountdown').classList.add('d-none');
   document.getElementById('btnRecord').classList.remove('d-none');
   document.getElementById('btnStop').classList.add('d-none');
   document.getElementById('btnRetake').classList.add('d-none');

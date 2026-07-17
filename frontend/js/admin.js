@@ -148,7 +148,7 @@ function showTab(tab, el) {
 
   if (tab === 'members')  loadMembers();
   if (tab === 'feedback') { loadFeedback(); loadVideoFeedback(); }
-  if (tab === 'carousel') loadCarouselSlides();
+  if (tab === 'carousel') { loadAnnouncement(); loadCarouselSlides(); loadPerformances(); }
   if (tab === 'users')    loadUsers();
 }
 
@@ -385,6 +385,43 @@ async function setVideoFeedbackStatus(id, status, btn) {
 // ─── CAROUSEL / CONTENT ───
 const CATEGORY_LABELS = { EPA: 'Ekalavya Performing Arts', PWP: 'Picture Wicture Productions' };
 let editingSlideId = null;
+// ─── ANNOUNCEMENT BANNER ───
+async function loadAnnouncement() {
+  const form = document.getElementById('announcementForm');
+  if (!form) return;
+  try {
+    const cfg = await apiGet('/announcement');
+    form.message.value = cfg.message || '';
+    form.effect.value = cfg.effect || 'balloons';
+    document.getElementById('announcementActiveCheck').checked = !!cfg.active;
+  } catch (err) {
+    showToast(`Couldn't load announcement settings: ${err.message}`, 'danger');
+  }
+}
+
+document.getElementById('announcementForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('announcementSubmitBtn');
+  const alertEl = document.getElementById('announcementAlert');
+  alertEl.classList.add('d-none');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  try {
+    await apiPatch('/announcement', {
+      message: form.message.value,
+      effect: form.effect.value,
+      active: document.getElementById('announcementActiveCheck').checked,
+    });
+    showToast('Announcement saved', 'success');
+  } catch (err) {
+    alertEl.className = 'alert alert-danger py-2 small mt-3 mb-0';
+    alertEl.textContent = err.message;
+    alertEl.classList.remove('d-none');
+  }
+  btn.disabled = false; btn.textContent = 'Save Announcement';
+});
+
 let _carouselSlidesCache = [];
 
 function escapeHtml(str) {
@@ -537,6 +574,118 @@ async function deleteSlide(id) {
     if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.detail || `HTTP ${res.status}`); }
     showToast('Slide deleted', 'success');
     loadCarouselSlides();
+  } catch (err) {
+    showToast(err.message, 'danger');
+  }
+}
+
+// ─── PERFORMANCES ───
+let _performancesCache = [];
+let editingPerformanceId = null;
+
+async function loadPerformances() {
+  const el = document.getElementById('performancesAdminGrid');
+  el.innerHTML = '<div class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</div>';
+  try {
+    const items = await apiGet('/performances');
+    _performancesCache = items;
+    if (!items.length) {
+      el.innerHTML = '<p class="text-muted text-center py-4">No performances added yet. Use the form above to add your first one.</p>';
+      return;
+    }
+    el.innerHTML = '<div class="carousel-admin-cards">' + items.map(p => `
+      <div class="carousel-admin-card">
+        <div class="carousel-admin-thumb" style="background-image:url('https://img.youtube.com/vi/${encodeURIComponent(p.youtube_video_id)}/hqdefault.jpg')"></div>
+        <div class="carousel-admin-info">
+          <div class="carousel-admin-meta">
+            <span class="interest-tag">${CATEGORY_LABELS[p.category] || p.category}</span>
+            ${p.location ? `<span>${escapeHtml(p.location)}</span>` : ''}
+          </div>
+          <div class="carousel-admin-name">${escapeHtml(p.title)}</div>
+        </div>
+        <div class="carousel-admin-actions">
+          <button class="btn-sm-action btn-view" onclick="editPerformance('${p.id}')">Edit</button>
+          <button class="btn-sm-action btn-inactive" onclick="deletePerformance('${p.id}')">Delete</button>
+        </div>
+      </div>`).join('') + '</div>';
+  } catch (err) {
+    el.innerHTML = `<p class="text-danger">${err.message}</p>`;
+  }
+}
+
+function editPerformance(id) {
+  const item = _performancesCache.find(p => p.id === id);
+  if (!item) return;
+  editingPerformanceId = id;
+
+  const form = document.getElementById('performanceForm');
+  form.title.value = item.title || '';
+  form.category.value = item.category || 'EPA';
+  form.youtube_url.value = `https://www.youtube.com/watch?v=${item.youtube_video_id}`;
+  form.location.value = item.location || '';
+  form.description.value = item.description || '';
+
+  document.getElementById('performanceSubmitBtn').innerHTML = '<i class="bi bi-check-lg"></i> Update Performance';
+  document.getElementById('performanceCancelBtn').classList.remove('d-none');
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelPerformanceEdit() {
+  editingPerformanceId = null;
+  const form = document.getElementById('performanceForm');
+  form.reset();
+  document.getElementById('performanceFormAlert').classList.add('d-none');
+  const btn = document.getElementById('performanceSubmitBtn');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="bi bi-plus-lg"></i> Add Performance';
+  document.getElementById('performanceCancelBtn').classList.add('d-none');
+}
+
+document.getElementById('performanceForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('performanceSubmitBtn');
+  const alertEl = document.getElementById('performanceFormAlert');
+  alertEl.classList.add('d-none');
+  const wasEditing = editingPerformanceId;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+  const body = {
+    title: form.title.value,
+    category: form.category.value,
+    youtube_url: form.youtube_url.value,
+    location: form.location.value || null,
+    description: form.description.value || null,
+  };
+
+  try {
+    if (wasEditing) {
+      await apiPatch(`/performances/${wasEditing}`, body);
+    } else {
+      await apiPost('/performances', body);
+    }
+    cancelPerformanceEdit();
+    showToast(wasEditing ? 'Performance updated' : 'Performance added', 'success');
+    loadPerformances();
+  } catch (err) {
+    alertEl.className = 'alert alert-danger py-2 small mt-3 mb-0';
+    alertEl.textContent = err.message;
+    alertEl.classList.remove('d-none');
+    btn.disabled = false;
+    btn.innerHTML = wasEditing ? '<i class="bi bi-check-lg"></i> Update Performance' : '<i class="bi bi-plus-lg"></i> Add Performance';
+  }
+});
+
+async function deletePerformance(id) {
+  const item = _performancesCache.find(p => p.id === id);
+  if (!confirm(`Delete "${item ? item.title : 'this performance'}"? This can't be undone.`)) return;
+  try {
+    const token = getToken();
+    const res = await fetch(`${API}/performances/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.detail || `HTTP ${res.status}`); }
+    if (editingPerformanceId === id) cancelPerformanceEdit();
+    showToast('Performance deleted', 'success');
+    loadPerformances();
   } catch (err) {
     showToast(err.message, 'danger');
   }

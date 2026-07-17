@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from datetime import datetime, timedelta
 from typing import Optional, List
-import asyncio, os, jwt, bcrypt, base64
+import asyncio, os, jwt, bcrypt, base64, re
 
 from app.models import (
     MemberRegistration, MemberRegistrationOut,
@@ -13,6 +13,8 @@ from app.models import (
     VideoFeedbackOut, VideoFeedbackPublicOut,
     LoginRequest, TokenResponse, UserCreate, UserOut,
     CarouselSlideOut, VALID_CAROUSEL_CATEGORIES,
+    AnnouncementSettings, AnnouncementOut,
+    PerformanceCreate, PerformanceOut,
 )
 from app import youtube as yt
 
@@ -374,6 +376,78 @@ async def delete_carousel_slide(slide_id: str, admin=Depends(require_admin)):
     r = await app.state.db.carousel.delete_one({"_id": oid})
     if r.deleted_count == 0: raise HTTPException(404, "Not found")
     return {"message": "Slide deleted"}
+
+# ANNOUNCEMENT BANNER — single settings document (not a list like carousel),
+# upserted in place. GET is public so the homepage overlay can render it.
+DEFAULT_ANNOUNCEMENT = {"message": "", "effect": "none", "active": False, "updated_at": None}
+
+@app.get("/announcement", response_model=AnnouncementOut, tags=["announcement"])
+async def get_announcement():
+    doc = await app.state.db.announcement.find_one({})
+    return doc or DEFAULT_ANNOUNCEMENT
+
+@app.patch("/announcement", response_model=AnnouncementOut, tags=["announcement"])
+async def update_announcement(payload: AnnouncementSettings, admin=Depends(require_admin)):
+    update = payload.dict()
+    update["updated_at"] = datetime.utcnow()
+    await app.state.db.announcement.update_one({}, {"$set": update}, upsert=True)
+    return await app.state.db.announcement.find_one({})
+
+# PERFORMANCES — admin-curated video list for the homepage "Recent
+# Performances" grid. The submitted YouTube URL itself isn't stored — only
+# the video ID extracted from it server-side, so the frontend never has to
+# parse it. The admin edit form reconstructs a canonical watch URL from that
+# ID to prefill the field (see script.js/admin.js).
+YOUTUBE_ID_RE = re.compile(r"(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([A-Za-z0-9_-]{11})")
+
+def extract_youtube_video_id(url: str) -> str:
+    m = YOUTUBE_ID_RE.search(url)
+    if not m:
+        raise HTTPException(400, "Couldn't find a YouTube video ID in that URL. Paste a full youtube.com or youtu.be link.")
+    return m.group(1)
+
+@app.post("/performances", response_model=PerformanceOut, tags=["performances"], status_code=201)
+async def create_performance(payload: PerformanceCreate, admin=Depends(require_admin)):
+    doc = {
+        "title": payload.title,
+        "description": payload.description or None,
+        "location": payload.location or None,
+        "youtube_video_id": extract_youtube_video_id(payload.youtube_url),
+        "category": payload.category,
+        "created_at": datetime.utcnow(),
+    }
+    result = await app.state.db.performances.insert_one(doc)
+    created = await app.state.db.performances.find_one({"_id": result.inserted_id})
+    return _serialize(created)
+
+@app.get("/performances", response_model=List[PerformanceOut], tags=["performances"])
+async def list_performances():
+    cursor = app.state.db.performances.find({}).sort([("created_at", -1)])
+    return [_serialize(p) for p in await cursor.to_list(length=200)]
+
+@app.patch("/performances/{performance_id}", response_model=PerformanceOut, tags=["performances"])
+async def update_performance(performance_id: str, payload: PerformanceCreate, admin=Depends(require_admin)):
+    try: oid = ObjectId(performance_id)
+    except: raise HTTPException(400, "Invalid ID")
+    existing = await app.state.db.performances.find_one({"_id": oid})
+    if not existing: raise HTTPException(404, "Not found")
+    update = {
+        "title": payload.title,
+        "description": payload.description or None,
+        "location": payload.location or None,
+        "youtube_video_id": extract_youtube_video_id(payload.youtube_url),
+        "category": payload.category,
+    }
+    await app.state.db.performances.update_one({"_id": oid}, {"$set": update})
+    return _serialize(await app.state.db.performances.find_one({"_id": oid}))
+
+@app.delete("/performances/{performance_id}", tags=["performances"])
+async def delete_performance(performance_id: str, admin=Depends(require_admin)):
+    try: oid = ObjectId(performance_id)
+    except: raise HTTPException(400, "Invalid ID")
+    r = await app.state.db.performances.delete_one({"_id": oid})
+    if r.deleted_count == 0: raise HTTPException(404, "Not found")
+    return {"message": "Performance deleted"}
 
 # STATS
 @app.get("/stats", tags=["stats"])

@@ -106,6 +106,47 @@ class VideoFeedbackPublicOut(BaseModel):
     created_at: Optional[datetime] = None
     class Config: orm_mode = True
 
+VALID_ANNOUNCEMENT_EFFECTS = {"balloons", "sparkle", "rain", "confetti", "snow", "crackers", "hearts", "none"}
+
+class AnnouncementSettings(BaseModel):
+    message: str = Field(..., min_length=1, max_length=200)
+    effect: str = Field(default="balloons")
+    active: bool = Field(default=True)
+
+    @validator("effect")
+    def validate_effect(cls, v):
+        if v not in VALID_ANNOUNCEMENT_EFFECTS: raise ValueError(f"Effect must be one of {VALID_ANNOUNCEMENT_EFFECTS}")
+        return v
+
+class AnnouncementOut(AnnouncementSettings):
+    message: str = Field(default="", max_length=200)  # unlike the input model, "" is valid here — it's the no-announcement-configured-yet state
+    updated_at: Optional[datetime] = None
+    class Config: orm_mode = True
+
+VALID_PERFORMANCE_CATEGORIES = {"EPA", "PWP"}
+
+class PerformanceCreate(BaseModel):
+    title: str = Field(..., min_length=2, max_length=150)
+    description: Optional[str] = Field(None, max_length=500)
+    location: Optional[str] = None
+    youtube_url: str = Field(..., min_length=1)
+    category: str
+
+    @validator("category")
+    def validate_category(cls, v):
+        if v not in VALID_PERFORMANCE_CATEGORIES: raise ValueError("Category must be EPA or PWP")
+        return v
+
+class PerformanceOut(BaseModel):
+    id: str
+    title: str
+    description: Optional[str] = None
+    location: Optional[str] = None
+    youtube_video_id: str
+    category: str
+    created_at: Optional[datetime] = None
+    class Config: orm_mode = True
+
 # Auth models
 class LoginRequest(BaseModel):
     username: str

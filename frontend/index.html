@@ -98,27 +98,21 @@
 </head>
 <body>
 
-  <!-- 10TH ANNIVERSARY OVERLAY — transparent, floats above the page, closable -->
+  <!-- ANNOUNCEMENT BANNER — admin-managed (Content tab), transparent, floats
+       above the page, closable. Empty/hidden by default until script.js's
+       loadAnnouncementBanner() fetches GET /announcement and fills it in;
+       removed from the DOM entirely if there's no active announcement. -->
   <div id="bdayOverlay" class="bday-overlay" aria-hidden="true">
-    <div class="bday-balloons">
-      <span class="balloon bday-b1"></span>
-      <span class="balloon bday-b2"></span>
-      <span class="balloon bday-b3"></span>
-      <span class="balloon bday-b4"></span>
-      <span class="balloon bday-b5"></span>
-      <span class="balloon bday-b6"></span>
-      <span class="balloon bday-b7"></span>
-      <span class="balloon bday-b8"></span>
-    </div>
+    <div class="bday-effect-layer" id="bdayEffectLayer"></div>
     <div class="bday-badge">
-      <button type="button" class="bday-close" onclick="dismissBdayOverlay()" aria-label="Close anniversary banner">&times;</button>
-      <span class="bday-badge-emoji">🎉</span>
-      <span class="bday-badge-text">Celebrating <strong>10&nbsp;Years</strong> of Ekalavya Performing Arts!</span>
+      <button type="button" class="bday-close" onclick="dismissBdayOverlay()" aria-label="Close announcement banner">&times;</button>
+      <span class="bday-badge-emoji" id="bdayBadgeEmoji">🎉</span>
+      <span class="bday-badge-text" id="bdayBadgeText"></span>
     </div>
   </div>
 
   <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg sticky-top" id="mainNav" style="padding:8px 16px;">
+  <nav class="navbar sticky-top" id="mainNav" style="padding:8px 16px;">
     <div style="display:flex;align-items:center;width:100%;gap:0;">
       <a href="#home" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
         <img src="images/epa_logo.png" alt="Ekalavya Performing Arts Logo" class="nav-logo" onerror="this.style.display='none'">
@@ -373,19 +367,30 @@
     </div>
   </section>
 
-  <!-- PERFORMANCES -->
+  <!-- PERFORMANCES — admin-managed (Content tab). loadPerformances() in
+       script.js fetches GET /performances and, if it returns ≥1 item,
+       replaces #performancesGrid with paginated (6 per page) admin-added
+       cards. If the fetch fails or returns nothing, the static fallback
+       cards below are left untouched, same pattern as the hero carousel. -->
   <section id="performances" class="section-pad bg-cream">
     <div class="container">
       <div class="section-header text-center mb-5">
         <h2 class="section-title">Recent Performances</h2>
       </div>
-      <div class="row g-4">
+      <div class="row g-4" id="performancesGrid">
         <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/zNTE-vvh4u0" title="Mime By EPA" allowfullscreen></iframe></div><div class="perf-info"><h5>Mime By EPA</h5><p>An expressive non-verbal performance showcasing the art of mime and physical storytelling.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Bengaluru</span></div></div></div>
         <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/RDOgWZjN1_A" title="Kalakriti 2023" allowfullscreen></iframe></div><div class="perf-info"><h5>Kalakriti 2023</h5><p>EPA's annual celebration of performing arts, featuring theatrical and non-verbal performances.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Bengaluru</span></div></div></div>
         <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/QHOtKtxRc6U" title="Kalakriti 2025" allowfullscreen></iframe></div><div class="perf-info"><h5>Kalakriti 2025</h5><p>Highlights from EPA's annual celebration of performing arts, featuring theatrical and non-verbal performances.</p><span class="perf-venue"><i class="bi bi-geo-alt"></i> Bengaluru</span></div></div></div>
         <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/cvIfDwrFYUg" title="Short Film : Tinni" allowfullscreen></iframe></div><div class="perf-info"><h5>Short Film : Tinni</h5><p>A socially conscious short film by Picture Wicture Productions exploring human stories and emotions.</p></div></div></div>
         <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/upRUMdJxGJo" title="Short Film : Bhool" allowfullscreen></iframe></div><div class="perf-info"><h5>Short Film : Bhool</h5><p>An aspiring theatre director's search for the perfect protagonist leads to a chance encounter with a quirky old servant — turning a mundane evening into an unforgettable one, whose answer may prove to be a grave mistake.</p></div></div></div>
         <div class="col-md-6 col-lg-4"><div class="perf-card"><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/St89W6c_qMA" title="Short Film : Antorone" allowfullscreen></iframe></div><div class="perf-info"><h5>Short Film : Antorone</h5><p>Sometimes the most carefully laid plans come undone — and when nothing unfolds as intended, life quietly takes a turn of its own.</p></div></div></div>
+      </div>
+      <div class="fbwall-pagination-row d-none" id="performancesPagination">
+        <div class="fbwall-pagination">
+          <button type="button" class="fbwall-page-arrow" id="perfPrev" aria-label="Previous performances"><i class="bi bi-chevron-left"></i></button>
+          <span class="fbwall-page-indicator" id="perfPageIndicator">1 / 1</span>
+          <button type="button" class="fbwall-page-arrow" id="perfNext" aria-label="Next performances"><i class="bi bi-chevron-right"></i></button>
+        </div>
       </div>
     </div>
   </section>
@@ -395,7 +400,7 @@
     <div class="container">
       <div class="section-header text-center mb-4">
         <span class="section-label">What Patrons Say</span>
-        <h2 class="section-title">Voices from the Audience</h2>
+        <h2 class="section-title">Voices of Our Patrons</h2>
       </div>
       <div class="fbwall-layout" id="fbWallLayout">
         <div class="fbwall-videos fbwall-videos-left" id="fbVideosLeft"><div class="fbwall-loading"><i class="bi bi-hourglass-split"></i> Loading...</div></div>
@@ -465,6 +470,10 @@
             <div class="rec-indicator d-none" id="recIndicator">
               <span class="rec-dot"></span>
               <span id="recTimer">00:00</span>
+            </div>
+            <div class="rec-countdown d-none" id="recCountdown">
+              <span class="rec-countdown-label">Recording starts in</span>
+              <span class="rec-countdown-num" id="recCountdownNum">5</span>
             </div>
           </div>
 
