@@ -1107,7 +1107,7 @@ body {
 }
 
 /* Hard size guards */
-#mainNav { max-height: 90px; overflow: visible; }
+#mainNav { max-height: 106px; overflow: visible; }
 #mainNav img { max-height: 70px !important; }
 
 @media (max-width: 991px) {
@@ -1304,11 +1304,22 @@ body {
    width (see .nav-pw-brand-wrap below, and .pw-nav-text inside the 1749px
    block) — it used to disappear below one shared 1750px breakpoint, which
    is wider than nearly every real laptop screen, so most visitors never saw
-   the Picture Wicture logo/name at all. ════ */
+   the Picture Wicture logo/name at all.
+
+   At this width the whole row (EPA brand → links → Picture Wicture brand) is
+   centered as one group instead of the two brands pinning to opposite edges
+   with the links stretched between them — the collapse's inline flex:1
+   (needed on mobile so it fills the space under the toggler) is overridden
+   here so it doesn't act as a spacer pushing the Picture Wicture brand out
+   to the far edge. Only applies at this breakpoint — the mobile/hamburger
+   layout below it keeps the conventional brand-left, toggler-right
+   arrangement. ════ */
 @media (min-width: 1520px) {
   nav#mainNav .navbar-toggler { display: none !important; }
+  #mainNav > div { justify-content: center; }
   nav#mainNav .navbar-collapse {
     display: flex !important;
+    flex: 0 1 auto !important;
     align-items: center !important;
   }
   nav#mainNav .navbar-nav {
@@ -2077,7 +2088,7 @@ nav#mainNav .btn-join {
 
 .bday-badge {
   position: fixed;
-  top: 66px;
+  top: 96px; /* clears the ~73-85px-tall nav bar below the 1520px breakpoint (see @media max-width:1519px below and the nav padding increase in index.html); the 1520px+ tier overrides this further down */
   left: 50%;
   transform: translateX(-50%); /* fallback for prefers-reduced-motion, where bdayPulseScale (the only other source of this transform) is disabled below */
   pointer-events: auto;
@@ -2170,7 +2181,9 @@ nav#mainNav .btn-join {
 }
 
 @media (max-width: 480px) {
-  .bday-badge { font-size: 0.85rem; padding: 11px 40px 11px 16px; gap: 8px; }
+  /* Below ~480px the EPA brand text wraps, making the nav bar taller
+     (~106px) than the 73-85px range the base .bday-badge top:96px assumes. */
+  .bday-badge { top: 114px; font-size: 0.85rem; padding: 11px 40px 11px 16px; gap: 8px; }
   .bday-badge-emoji { font-size: 1.2em; }
   .eka-particle--balloons { width: 34px; height: 44px; }
 }
