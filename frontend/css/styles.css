@@ -1813,3 +1813,127 @@ nav#mainNav .btn-join {
   opacity: 1;
   transform: translateY(3px);
 }
+
+/* ═══ 10TH ANNIVERSARY OVERLAY ═══
+   Transparent fixed layer above the page. Balloons are purely decorative
+   (pointer-events: none) so nothing underneath is ever blocked; only the
+   small badge itself is clickable, for the close button. */
+.bday-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1030; /* above sticky navbar (1020), below Bootstrap modals (1050+) */
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+.bday-overlay.bday-overlay-hide { opacity: 0; }
+
+.bday-balloons { position: absolute; inset: 0; overflow: hidden; }
+
+.balloon {
+  position: absolute;
+  bottom: -160px;
+  width: 44px;
+  height: 56px;
+  border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+  opacity: 0;
+  pointer-events: none;
+  animation: balloonRise linear infinite;
+}
+.balloon::before { /* knot */
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid currentColor;
+}
+.balloon::after { /* string */
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: 64px;
+  background: rgba(40,30,20,0.22);
+}
+
+.bday-b1 { left: 6%;  color: #8B0000; background: radial-gradient(circle at 34% 28%, #d96a6a, #8B0000 72%); animation-duration: 15s; animation-delay: 0s; }
+.bday-b2 { left: 18%; color: #d4a017; background: radial-gradient(circle at 34% 28%, #f4cf6b, #b8860b 72%); width: 38px; height: 48px; animation-duration: 12.5s; animation-delay: 2.4s; }
+.bday-b3 { left: 30%; color: #2f7d6b; background: radial-gradient(circle at 34% 28%, #5fae9a, #235c4e 72%); animation-duration: 17s; animation-delay: 5.1s; }
+.bday-b4 { left: 44%; color: #c9628a; background: radial-gradient(circle at 34% 28%, #f0a5be, #b1486c 72%); width: 40px; height: 50px; animation-duration: 13.5s; animation-delay: 1.2s; }
+.bday-b5 { left: 58%; color: #8B0000; background: radial-gradient(circle at 34% 28%, #d96a6a, #8B0000 72%); width: 36px; height: 46px; animation-duration: 16s; animation-delay: 7s; }
+.bday-b6 { left: 71%; color: #d4a017; background: radial-gradient(circle at 34% 28%, #f4cf6b, #b8860b 72%); animation-duration: 14s; animation-delay: 3.6s; }
+.bday-b7 { left: 84%; color: #2f7d6b; background: radial-gradient(circle at 34% 28%, #5fae9a, #235c4e 72%); width: 40px; height: 50px; animation-duration: 18s; animation-delay: 8.4s; }
+.bday-b8 { left: 93%; color: #c9628a; background: radial-gradient(circle at 34% 28%, #f0a5be, #b1486c 72%); width: 34px; height: 44px; animation-duration: 12s; animation-delay: 4.8s; }
+
+@keyframes balloonRise {
+  0%   { transform: translate(0, 0) rotate(-3deg); opacity: 0; }
+  8%   { opacity: 0.9; }
+  25%  { transform: translate(16px, -28vh) rotate(3deg); }
+  50%  { transform: translate(-14px, -55vh) rotate(-3deg); }
+  75%  { transform: translate(14px, -82vh) rotate(2deg); }
+  92%  { opacity: 0.8; }
+  100% { transform: translate(-10px, -114vh) rotate(-2deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balloon { display: none; }
+}
+
+.bday-badge {
+  position: fixed;
+  top: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1.5px solid var(--gold);
+  border-radius: 100px;
+  padding: 9px 40px 9px 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  max-width: calc(100vw - 32px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bday-badge-emoji { flex-shrink: 0; }
+.bday-badge-text strong { color: var(--crimson); }
+
+.bday-close {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.06);
+  color: #555;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.bday-close:hover { background: rgba(139,0,0,0.14); color: var(--crimson); }
+
+@media (min-width: 992px) {
+  .bday-badge { top: 100px; }
+}
+
+@media (max-width: 480px) {
+  .bday-badge { font-size: 0.75rem; padding: 8px 34px 8px 12px; gap: 6px; }
+  .balloon { width: 34px; height: 44px; }
+}

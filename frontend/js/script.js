@@ -88,6 +88,24 @@ function escapeHtml(str) {
 })();
 
 // ══════════════════════════════════════════
+// 10TH ANNIVERSARY OVERLAY — dismiss once, remembered per visitor
+// ══════════════════════════════════════════
+(function () {
+  const DISMISS_KEY = 'eka_bday10_dismissed';
+  const overlay = document.getElementById('bdayOverlay');
+  if (!overlay) return;
+  if (localStorage.getItem(DISMISS_KEY) === 'true') {
+    overlay.remove();
+    return;
+  }
+  window.dismissBdayOverlay = function () {
+    localStorage.setItem(DISMISS_KEY, 'true');
+    overlay.classList.add('bday-overlay-hide');
+    setTimeout(() => overlay.remove(), 400);
+  };
+})();
+
+// ══════════════════════════════════════════
 // MODAL HELPERS  (Bootstrap + manual fallback)
 // ══════════════════════════════════════════
 function openModal(id) {

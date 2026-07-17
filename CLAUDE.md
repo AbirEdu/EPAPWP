@@ -21,6 +21,11 @@ Full-stack web app for Ekalavya Performing Arts & Picture Wicture Productions: a
 - MongoDB via Motor (async), hosted on **MongoDB Atlas** (not a local container — there is no `mongo` service in `docker-compose.yml`). Collections: `members`, `feedback`, `video_feedback`, `carousel`, `users`. Indexes and the default admin user are created idempotently in `main.py`'s `startup` event via Motor; there's no separate init script. `MONGO_URL` (an `mongodb+srv://` Atlas connection string) and `JWT_SECRET` are required env vars — `docker-compose.yml` fails fast with a clear error if either is missing from `.env`. Copy `.env.example` to `.env` and fill in real values (`.env` is gitignored).
 - Carousel poster images are stored as base64 data URIs directly on the `carousel` document (`poster_image` field), not as files on disk. This was a deliberate choice: `docker-compose.prod.yml`'s `api` service has no volume mount (code is baked into the image at build time), so anything the API writes to its own filesystem would vanish on the next deploy and never reach nginx's `./frontend` bind mount anyway. Base64-in-Mongo sidesteps that entirely at the cost of a larger document (capped at 4MB raw upload via `MAX_POSTER_BYTES` in `main.py`). If this ever needs to change to real file storage, a shared Docker volume between `api` and `frontend` (or S3-style object storage) would be the fix, not a bind mount of `./frontend` into `api`.
 - Docs (uploaded PDFs etc.) live under `frontend/docs/`.
+- `POST /feedback/video` uploads to the EPA YouTube channel via `backend/app/youtube.py`, which needs `YOUTUBE_CLIENT_ID`/`YOUTUBE_CLIENT_SECRET`/`YOUTUBE_REFRESH_TOKEN` env vars from a one-time OAuth consent flow (`scripts/youtube_oauth_setup.py`, run by the channel owner). `youtube.is_configured()` returns `False` until those are set, and callers degrade gracefully rather than call `upload_video()`.
+
+## Production deployment
+
+`docker-compose.prod.yml` (not `docker-compose.yml`) is what runs on the server — add a `caddy` service in front for automatic HTTPS and stop publishing the `api` container's port 8000 to the internet (nginx already proxies `/api/` to it internally). `Caddyfile` routes `epapwp.in` → `frontend:80` and redirects `www.epapwp.in` → `epapwp.in`. Deploy with `docker compose -f docker-compose.prod.yml up -d --build`.
 
 ## Running the stack
 
