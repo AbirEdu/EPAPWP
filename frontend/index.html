@@ -112,18 +112,26 @@
   </div>
 
   <!-- NAVBAR -->
-  <nav class="navbar sticky-top" id="mainNav" style="padding:16px 16px;">
-    <div style="display:flex;align-items:center;width:100%;gap:0;">
-      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+  <nav class="navbar sticky-top" id="mainNav">
+    <div class="nav-brand-row">
+      <div class="nav-epa-brand">
         <img src="images/epa_logo.png" alt="Ekalavya Performing Arts Logo" class="nav-logo" onerror="this.style.display='none'">
         <span class="ekalavya-title">Ekalavya Performing Arts</span>
       </div>
-      <div style="width:1px;height:36px;background:#e0dbd4;margin:0 8px;flex-shrink:0;"></div>
-      <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <div class="nav-pw-brand-wrap">
+        <img src="images/pw_logo.png" alt="Picture Wicture Productions" class="pw-nav-logo">
+        <div class="pw-nav-text">
+          <span class="pw-name-line"><span class="pw-p">P</span><span class="pw-rest">icture </span><span class="pw-w">W</span><span class="pw-rest">icture </span><span class="pw-pg">P</span><span class="pw-rest">roductions</span></span>
+          <span class="pw-tagline">Where Art meets Entertainment</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-menu-row">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav" style="flex:1;">
-        <ul class="navbar-nav align-items-center" style="justify-content:center;flex-wrap:nowrap;width:100%;">
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav align-items-center">
           <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
           <li class="nav-item"><a class="nav-link" href="#picture-wicture" style="white-space:nowrap">Picture Wicture Productions</a></li>
@@ -142,17 +150,6 @@
             </button>
           </li>
         </ul>
-      </div>
-      <div class="nav-pw-brand-wrap" style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-        <div style="width:1px;height:36px;background:#e0dbd4;margin:0 4px;"></div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <img src="images/pw_logo.png" alt="Picture Wicture Productions" class="pw-nav-logo">
-          <span class="pw-nav-abbrev">PWP</span>
-          <div class="pw-nav-text">
-            <span class="pw-name-line"><span class="pw-p">P</span><span class="pw-rest">icture </span><span class="pw-w">W</span><span class="pw-rest">icture </span><span class="pw-pg">P</span><span class="pw-rest">roductions</span></span>
-            <span class="pw-tagline">Where Art meets Entertainment</span>
-          </div>
-        </div>
       </div>
     </div>
   </nav>

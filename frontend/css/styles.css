@@ -1074,19 +1074,6 @@ body {
   gap: 2px;
 }
 
-/* Compact stand-in for .pw-nav-text below the 1750px full-branding
-   breakpoint (see @media max-width:1749px) — the icon alone gave no
-   indication of the org's name at any width narrower than that. Hidden by
-   default; shown only where .pw-nav-text is hidden. */
-.pw-nav-abbrev {
-  display: none;
-  font-family: 'Arial Rounded MT Bold', 'Arial Rounded MT', Arial, sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #1a3c78;
-  white-space: nowrap;
-}
-
 /* "Picture Wicture Productions" — ALL ON ONE LINE */
 .pw-name-line {
   font-family: 'Arial Rounded MT Bold', 'Arial Rounded MT', Arial, sans-serif;
@@ -1119,18 +1106,13 @@ body {
   flex-shrink: 0;
 }
 
-/* Hard size guards */
-#mainNav { max-height: 106px; overflow: visible; }
-#mainNav img { max-height: 70px !important; }
-
 @media (max-width: 991px) {
   .pw-name-line { font-size: 0.78rem; }
-  .pw-tagline { display: none; }
   .pw-nav-logo { height: 36px !important; width: 36px !important; max-width: 36px !important; max-height: 36px !important; min-width: 36px; }
 }
-@media (max-width: 400px) {
-  .pw-nav-text { display: none; }
-  .nav-divider { display: none; }
+@media (max-width: 480px) {
+  .pw-name-line { font-size: 0.68rem; }
+  .pw-tagline { font-size: 0.56rem; }
 }
 
 /* ── Manual modal fallback (works without Bootstrap JS on file://) ── */
@@ -1308,73 +1290,86 @@ body {
   }
 }
 
-/* ════ NAVBAR single-row layout — custom breakpoints, NOT Bootstrap's
-   navbar-expand-lg (992px). <nav id="mainNav"> intentionally has no
-   navbar-expand-* class — Bootstrap's canned breakpoints don't land where
-   this nav actually needs them, so both directions are handled with custom
-   rules here, including the toggler's visibility (normally Bootstrap's job).
+/* ════ NAVBAR — two rows ════
+   Row 1 (.nav-brand-row): both logos, always shown together — never
+   competes with the menu links for horizontal space, so it's just a
+   centered, wrapping flex row. On narrow screens the Picture Wicture block
+   naturally wraps to its own centered line below the EPA brand; no JS or
+   extra breakpoints needed for that, flex-wrap handles it.
 
-   Two INDEPENDENT breakpoints, empirically measured:
-   - 1560px — the 7 nav links + Admin + Join Us + the Picture Wicture *icon*
-     plus its "PWP" abbreviation label (no full text) fit in one row above
-     this; below it they collapse to the hamburger menu. (Verified minimum:
-     1530px — this moved up from an earlier 1505px measurement once the PWP
-     label was added; re-measure if the icon/abbrev markup changes again.)
-   - 1750px — only above this is there enough room to ALSO show the full
-     "Picture Wicture Productions" text + tagline instead of the abbreviation.
-     (Verified minimum: 1720px.)
+   Row 2 (.nav-menu-row): the links + Admin + Join Us. This is the only part
+   that still needs a hamburger fallback, and — since it no longer has to
+   share room with either logo — the minimum width before it fits inline is
+   dramatically lower than the old single-row design's ~1715px.
+   Verified empirically: 950px is the true minimum; 1080px keeps a margin. */
+/* Bootstrap's own .navbar class sets display:flex in the default row
+   direction — without this, .nav-brand-row and .nav-menu-row only stack as
+   two visual rows when there happens not to be enough combined width for
+   both to sit side by side, which depends on font metrics/rendering and
+   isn't reliable. Forcing column direction here makes the two-row layout
+   unconditional regardless of viewport width. */
+#mainNav { flex-direction: column; align-items: stretch; }
 
-   Critically, the Picture Wicture brand ICON is never fully hidden at any
-   width (see .nav-pw-brand-wrap below, and .pw-nav-text inside the 1749px
-   block) — it used to disappear below one shared 1750px breakpoint, which
-   is wider than nearly every real laptop screen, so most visitors never saw
-   the Picture Wicture logo/name at all.
+.nav-brand-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #ede8e0;
+}
+.nav-epa-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
 
-   At this width the whole row (EPA brand → links → Picture Wicture brand) is
-   centered as one group instead of the two brands pinning to opposite edges
-   with the links stretched between them — the collapse's inline flex:1
-   (needed on mobile so it fills the space under the toggler) is overridden
-   here so it doesn't act as a spacer pushing the Picture Wicture brand out
-   to the far edge. Only applies at this breakpoint — the mobile/hamburger
-   layout below it keeps the conventional brand-left, toggler-right
-   arrangement. ════ */
-@media (min-width: 1560px) {
+.nav-pw-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.nav-menu-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+}
+.nav-menu-row .navbar-collapse {
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 1080px) {
   nav#mainNav .navbar-toggler { display: none !important; }
-  #mainNav > div { justify-content: center; }
-  nav#mainNav .navbar-collapse {
-    display: flex !important;
-    flex: 0 1 auto !important;
-    align-items: center !important;
-  }
   nav#mainNav .navbar-nav {
     display: flex !important;
     flex-direction: row !important; /* Bootstrap's own base .navbar-nav rule is flex-direction:column (mobile-first); that's normally flipped to row by .navbar-expand-lg's own min-width media query, which no longer applies since this nav has no navbar-expand-* class */
     align-items: center !important;
     flex-wrap: nowrap !important;
-    width: 100%;
     justify-content: center !important;
   }
 }
 
-@media (max-width: 1559px) {
+@media (max-width: 1079px) {
   nav#mainNav .navbar-toggler { display: block !important; }
-  /* The brand row (logo/title/toggler) is a single flex row shared with the
-     collapsible menu. When the menu opens it must drop to its own full-width
-     line below that row, not squeeze in beside it — and #mainNav's
-     max-height:90px guard (for the closed state) must lift so the sticky
-     nav can grow instead of clipping/overlapping the hero below it. */
-  #mainNav > div { flex-wrap: wrap; }
-  #mainNav:has(.navbar-collapse.show) { max-height: none; }
   nav#mainNav .navbar-collapse {
+    display: none;
     width: 100%;
-    flex: 1 1 100%;
   }
+  nav#mainNav .navbar-collapse.show { display: flex; }
   nav#mainNav .navbar-nav {
     flex-direction: column !important;
     align-items: stretch !important;
     width: 100%;
     gap: 2px;
-    padding: 12px 0 4px;
+    padding: 8px 0;
   }
   nav#mainNav .navbar-nav .nav-link {
     padding: 10px 4px !important;
@@ -1382,15 +1377,6 @@ body {
   }
 }
 
-@media (max-width: 1749px) {
-  /* Below the full-branding breakpoint, keep just the Picture Wicture icon
-     visible (it's small — ~46px — and never the thing that causes overflow)
-     and drop the full text block, which is what actually needs the extra
-     room — but swap in the compact "PWP" label so the org's name is still
-     legible, not just a bare icon. */
-  .pw-nav-text { display: none !important; }
-  .pw-nav-abbrev { display: inline-block !important; }
-}
 nav#mainNav .navbar-nav .nav-link {
   display: inline-flex !important;
   align-items: center !important;
@@ -2115,7 +2101,15 @@ nav#mainNav .btn-join {
 
 .bday-badge {
   position: fixed;
-  top: 96px; /* clears the ~73-85px-tall nav bar below the 1560px breakpoint (see @media max-width:1559px below and the nav padding increase in index.html); the 1560px+ tier overrides this further down */
+  /* --bday-nav-bottom is set dynamically in JS (see positionBadge() inside
+     loadAnnouncementBanner() in script.js) from the nav's actual measured
+     height, not a hardcoded breakpoint value — the nav's height varies too
+     much across widths/wrap-states (two-row brand+menu layout, mobile menu
+     open/closed, phone-wrap of the Picture Wicture block, etc.) for a
+     handful of fixed pixel tiers to reliably clear it without either
+     overlapping or leaving a big gap. The 66px fallback covers the instant
+     before that JS runs and the (rare) case it doesn't run at all. */
+  top: calc(var(--bday-nav-bottom, 56px) + 10px);
   left: 50%;
   transform: translateX(-50%); /* fallback for prefers-reduced-motion, where bdayPulseScale (the only other source of this transform) is disabled below */
   pointer-events: auto;
@@ -2198,19 +2192,8 @@ nav#mainNav .btn-join {
   }
 }
 
-@media (min-width: 1560px) {
-  /* Matches the navbar's links-inline breakpoint above — only the fully
-     inline nav row (taller than the compact hamburger-row nav used below
-     1560px) needs the badge pushed down further to clear it. Independent of
-     the 1750px full-branding breakpoint, which doesn't change the nav's
-     height, just the Picture Wicture text's visibility. */
-  .bday-badge { top: 100px; }
-}
-
 @media (max-width: 480px) {
-  /* Below ~480px the EPA brand text wraps, making the nav bar taller
-     (~106px) than the 73-85px range the base .bday-badge top:96px assumes. */
-  .bday-badge { top: 114px; font-size: 0.85rem; padding: 11px 40px 11px 16px; gap: 8px; }
+  .bday-badge { font-size: 0.85rem; padding: 11px 40px 11px 16px; gap: 8px; }
   .bday-badge-emoji { font-size: 1.2em; }
   .eka-particle--balloons { width: 34px; height: 44px; }
 }

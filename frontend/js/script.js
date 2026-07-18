@@ -230,6 +230,26 @@ function escapeHtml(str) {
     document.getElementById('bdayBadgeEmoji').textContent = EFFECT_EMOJI[cfg.effect] || '📢';
     renderParticles(cfg.effect);
 
+    // The badge's top offset is measured from the nav's actual rendered
+    // height rather than hardcoded per breakpoint — the two-row nav (brand
+    // row + menu row) varies too much across widths and mobile-menu
+    // open/closed states for a handful of fixed pixel tiers to reliably
+    // clear it without overlapping. Re-measured on resize and whenever the
+    // mobile menu opens/closes, since both change the nav's height.
+    const mainNav = document.getElementById('mainNav');
+    function positionBadge() {
+      if (!mainNav) return;
+      overlay.style.setProperty('--bday-nav-bottom', `${Math.round(mainNav.getBoundingClientRect().bottom)}px`);
+    }
+    positionBadge();
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(positionBadge, 100);
+    });
+    document.getElementById('navbarNav')?.addEventListener('shown.bs.collapse', positionBadge);
+    document.getElementById('navbarNav')?.addEventListener('hidden.bs.collapse', positionBadge);
+
     window.dismissBdayOverlay = function () {
       localStorage.setItem(DISMISS_KEY, fingerprint);
       overlay.classList.add('bday-overlay-hide');
