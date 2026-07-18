@@ -38,7 +38,7 @@ body {
 }
 
 .nav-logo {
-  height: 52px;
+  height: 35px;
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
@@ -52,7 +52,7 @@ body {
 
 .ekalavya-title {
   font-family: 'Permanent Marker', cursive;
-  font-size: 1.55rem;
+  font-size: 1.04rem;
   color: var(--crimson);
   line-height: 1;
   white-space: nowrap;
@@ -1051,11 +1051,11 @@ body {
 
 /* Logo — fixed size, never changes on hover */
 .pw-nav-logo {
-  height: 46px !important;
-  width: 46px !important;
-  min-width: 46px;
-  max-width: 46px !important;
-  max-height: 46px !important;
+  height: 32px !important;
+  width: 32px !important;
+  min-width: 32px;
+  max-width: 32px !important;
+  max-height: 32px !important;
   border-radius: 50%;
   object-fit: cover;
   border: 1.5px solid rgba(26,60,120,0.2);
@@ -1077,7 +1077,7 @@ body {
 /* "Picture Wicture Productions" — ALL ON ONE LINE */
 .pw-name-line {
   font-family: 'Arial Rounded MT Bold', 'Arial Rounded MT', Arial, sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.62rem;
   font-weight: 700;
   white-space: nowrap;
   display: block;
@@ -1085,7 +1085,7 @@ body {
 }
 
 .pw-tagline {
-  font-size: 0.62rem;
+  font-size: 0.42rem;
   color: #999;
   white-space: nowrap;
   display: block;
@@ -1316,21 +1316,21 @@ body {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 32px;
-  padding: 14px 16px;
+  gap: 22px;
+  padding: 9px 14px;
   border-bottom: 1px solid #ede8e0;
 }
 .nav-epa-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   flex-shrink: 0;
 }
 
 .nav-pw-brand-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   flex-shrink: 0;
 }
 
