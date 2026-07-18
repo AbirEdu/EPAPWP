@@ -1074,6 +1074,19 @@ body {
   gap: 2px;
 }
 
+/* Compact stand-in for .pw-nav-text below the 1750px full-branding
+   breakpoint (see @media max-width:1749px) — the icon alone gave no
+   indication of the org's name at any width narrower than that. Hidden by
+   default; shown only where .pw-nav-text is hidden. */
+.pw-nav-abbrev {
+  display: none;
+  font-family: 'Arial Rounded MT Bold', 'Arial Rounded MT', Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a3c78;
+  white-space: nowrap;
+}
+
 /* "Picture Wicture Productions" — ALL ON ONE LINE */
 .pw-name-line {
   font-family: 'Arial Rounded MT Bold', 'Arial Rounded MT', Arial, sans-serif;
@@ -1275,6 +1288,15 @@ body {
   .hero-slide.kotha-slide > .kotha-image {
     grid-column: 1 !important;
     grid-row: 2 !important;
+    /* Grid/flex items default to min-height:auto, which means "never shrink
+       below content's natural size" — without this override, the image's
+       own intrinsic aspect ratio forces this cell (and the row) taller than
+       the 1fr track actually has room for, blowing past .hero-slide's fixed
+       height and getting hard-clipped by its overflow:hidden. This is what
+       "carousel poster cropped/half-visible on mobile" was: the cell was
+       never actually constrained to the leftover space in the first place. */
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
   .hero-slide.kotha-slide > .kotha-image img {
     position: relative !important;
@@ -1293,11 +1315,13 @@ body {
    rules here, including the toggler's visibility (normally Bootstrap's job).
 
    Two INDEPENDENT breakpoints, empirically measured:
-   - 1520px — the 7 nav links + Admin + Join Us + the Picture Wicture *icon*
-     (no text) fit in one row above this; below it they collapse to the
-     hamburger menu. (Verified minimum: 1505px; 1520px keeps a small margin.)
+   - 1560px — the 7 nav links + Admin + Join Us + the Picture Wicture *icon*
+     plus its "PWP" abbreviation label (no full text) fit in one row above
+     this; below it they collapse to the hamburger menu. (Verified minimum:
+     1530px — this moved up from an earlier 1505px measurement once the PWP
+     label was added; re-measure if the icon/abbrev markup changes again.)
    - 1750px — only above this is there enough room to ALSO show the full
-     "Picture Wicture Productions" text + tagline next to the icon.
+     "Picture Wicture Productions" text + tagline instead of the abbreviation.
      (Verified minimum: 1720px.)
 
    Critically, the Picture Wicture brand ICON is never fully hidden at any
@@ -1314,7 +1338,7 @@ body {
    to the far edge. Only applies at this breakpoint — the mobile/hamburger
    layout below it keeps the conventional brand-left, toggler-right
    arrangement. ════ */
-@media (min-width: 1520px) {
+@media (min-width: 1560px) {
   nav#mainNav .navbar-toggler { display: none !important; }
   #mainNav > div { justify-content: center; }
   nav#mainNav .navbar-collapse {
@@ -1332,7 +1356,7 @@ body {
   }
 }
 
-@media (max-width: 1519px) {
+@media (max-width: 1559px) {
   nav#mainNav .navbar-toggler { display: block !important; }
   /* The brand row (logo/title/toggler) is a single flex row shared with the
      collapsible menu. When the menu opens it must drop to its own full-width
@@ -1361,8 +1385,11 @@ body {
 @media (max-width: 1749px) {
   /* Below the full-branding breakpoint, keep just the Picture Wicture icon
      visible (it's small — ~46px — and never the thing that causes overflow)
-     and drop the text block, which is what actually needs the extra room. */
+     and drop the full text block, which is what actually needs the extra
+     room — but swap in the compact "PWP" label so the org's name is still
+     legible, not just a bare icon. */
   .pw-nav-text { display: none !important; }
+  .pw-nav-abbrev { display: inline-block !important; }
 }
 nav#mainNav .navbar-nav .nav-link {
   display: inline-flex !important;
@@ -2088,7 +2115,7 @@ nav#mainNav .btn-join {
 
 .bday-badge {
   position: fixed;
-  top: 96px; /* clears the ~73-85px-tall nav bar below the 1520px breakpoint (see @media max-width:1519px below and the nav padding increase in index.html); the 1520px+ tier overrides this further down */
+  top: 96px; /* clears the ~73-85px-tall nav bar below the 1560px breakpoint (see @media max-width:1559px below and the nav padding increase in index.html); the 1560px+ tier overrides this further down */
   left: 50%;
   transform: translateX(-50%); /* fallback for prefers-reduced-motion, where bdayPulseScale (the only other source of this transform) is disabled below */
   pointer-events: auto;
@@ -2171,10 +2198,10 @@ nav#mainNav .btn-join {
   }
 }
 
-@media (min-width: 1520px) {
+@media (min-width: 1560px) {
   /* Matches the navbar's links-inline breakpoint above — only the fully
      inline nav row (taller than the compact hamburger-row nav used below
-     1520px) needs the badge pushed down further to clear it. Independent of
+     1560px) needs the badge pushed down further to clear it. Independent of
      the 1750px full-branding breakpoint, which doesn't change the nav's
      height, just the Picture Wicture text's visibility. */
   .bday-badge { top: 100px; }
