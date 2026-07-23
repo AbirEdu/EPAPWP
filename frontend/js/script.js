@@ -235,14 +235,17 @@ function escapeHtml(str) {
     // height rather than hardcoded per breakpoint — the two-row nav (brand
     // row + menu row) varies too much across widths and mobile-menu
     // open/closed states for a handful of fixed pixel tiers to reliably
-    // clear it without overlapping. Re-measured on resize and whenever the
-    // mobile menu opens/closes, since both change the nav's height.
+    // clear it without overlapping. Re-measured on resize, whenever the
+    // mobile menu opens/closes, and whenever the shrink-on-scroll nav (see
+    // the scroll listener below) changes height — all four change the
+    // nav's rendered height.
     const mainNav = document.getElementById('mainNav');
     function positionBadge() {
       if (!mainNav) return;
       overlay.style.setProperty('--bday-nav-bottom', `${Math.round(mainNav.getBoundingClientRect().bottom)}px`);
     }
     positionBadge();
+    window.repositionAnnouncementBadge = positionBadge;
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
@@ -583,6 +586,31 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', () => {
     const nav = document.getElementById('mainNav');
     if (nav) nav.style.boxShadow = window.scrollY > 60 ? '0 2px 30px rgba(0,0,0,0.15)' : '0 1px 20px rgba(0,0,0,0.08)';
+  });
+
+  // Shrink-on-scroll (mobile only): the two-logo brand row is tall enough to
+  // eat a big chunk of a phone screen, so once the visitor actually starts
+  // scrolling it collapses to small icons only, freeing that space back up.
+  // Separate add/remove thresholds (40 vs 20) avoid flicker right at the
+  // boundary. Re-checks matchMedia every scroll rather than once, so it
+  // correctly reverts if the viewport is resized past the breakpoint.
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('mainNav');
+    if (!nav) return;
+    const wasShrunk = nav.classList.contains('nav-shrunk');
+    if (!window.matchMedia('(max-width: 480px)').matches) {
+      nav.classList.remove('nav-shrunk');
+    } else if (window.scrollY > 40) {
+      nav.classList.add('nav-shrunk');
+    } else if (window.scrollY < 20) {
+      nav.classList.remove('nav-shrunk');
+    }
+    // The announcement badge's position is derived from the nav's height
+    // (see positionBadge() above) — re-measure once the shrink/expand
+    // transition finishes whenever this toggle actually changed something.
+    if (wasShrunk !== nav.classList.contains('nav-shrunk')) {
+      setTimeout(() => window.repositionAnnouncementBadge?.(), 260);
+    }
   });
 
   // Active nav link on scroll

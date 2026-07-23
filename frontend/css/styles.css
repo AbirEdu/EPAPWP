@@ -1356,6 +1356,26 @@ body {
   }
 }
 
+/* Shrink-on-scroll (mobile only): script.js toggles .nav-shrunk on #mainNav
+   once the visitor scrolls past a small threshold, collapsing the two-logo
+   brand row down to small icons only so it stops eating phone screen real
+   estate while browsing. Scrolling back near the top restores it. Logo
+   sizes/padding transition smoothly; the title/tagline text is simply
+   hidden (animating text width reliably needs a fixed max-width anchor,
+   which risks clipping real content — not worth it for a two-word label). */
+.nav-logo, .pw-nav-logo { transition: height 0.25s ease, width 0.25s ease; }
+@media (max-width: 480px) {
+  .nav-brand-row, .nav-menu-row { transition: padding 0.25s ease, gap 0.25s ease; }
+  #mainNav.nav-shrunk .nav-brand-row { padding: 4px 10px; gap: 10px; }
+  #mainNav.nav-shrunk .nav-menu-row { padding: 4px 16px; }
+  #mainNav.nav-shrunk .nav-logo { height: 26px; }
+  #mainNav.nav-shrunk .pw-nav-logo { height: 26px !important; width: 26px !important; max-width: 26px !important; max-height: 26px !important; min-width: 26px; }
+  #mainNav.nav-shrunk .ekalavya-title,
+  #mainNav.nav-shrunk .pw-nav-text {
+    display: none;
+  }
+}
+
 @media (max-width: 1079px) {
   nav#mainNav .navbar-toggler { display: block !important; }
   nav#mainNav .navbar-collapse {
