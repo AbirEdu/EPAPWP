@@ -110,7 +110,7 @@ class VideoFeedbackPublicOut(BaseModel):
     created_at: Optional[datetime] = None
     class Config: orm_mode = True
 
-VALID_ANNOUNCEMENT_EFFECTS = {"balloons", "sparkle", "rain", "confetti", "snow", "crackers", "hearts", "none"}
+VALID_ANNOUNCEMENT_EFFECTS = {"balloons", "sparkle", "rain", "confetti", "snow", "crackers", "hearts", "cake", "none"}
 
 class AnnouncementSettings(BaseModel):
     message: str = Field(..., min_length=1, max_length=200)

@@ -1798,7 +1798,11 @@ nav#mainNav .btn-join {
 .pwp-fc-role { color: var(--gold); font-size: 0.68rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; white-space: nowrap; }
 
 @media (max-width: 480px) {
-  .pwp-founders-row { flex-wrap: wrap; gap: 24px 16px; }
+  /* Flex-wrap doesn't work here: each .pwp-fc's width is driven by its
+     nowrap name text, so columns end up different widths and the circles
+     drift out of alignment from row to row. A 2-column grid forces equal-
+     width columns, so every circle lines up regardless of name length. */
+  .pwp-founders-row { display: grid; grid-template-columns: repeat(2, 1fr); justify-items: center; gap: 28px 8px; flex-wrap: unset; }
   .pwp-fc-img-wrap { width: 88px; height: 88px; }
 }
 
@@ -2094,6 +2098,24 @@ nav#mainNav .btn-join {
   100% { transform: translate(-10px, -102vh) rotate(45deg) scale(0.7); opacity: 0; }
 }
 
+/* Birthday Cake — unlike the other effects, this one renders the actual 🎂
+   emoji as the particle's text content (set in script.js) rather than a
+   CSS-drawn shape, so it just needs font-size + a gentle rise/sway. */
+.eka-particle--cake {
+  bottom: -40px;
+  font-size: 26px;
+  line-height: 1;
+  animation-name: cakeFloat;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes cakeFloat {
+  0%   { transform: translate(0, 0) rotate(-6deg) scale(0.7); opacity: 0; }
+  10%  { opacity: 0.95; }
+  50%  { transform: translate(16px, -50vh) rotate(6deg) scale(1); }
+  100% { transform: translate(-12px, -104vh) rotate(-6deg) scale(0.85); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .eka-particle { display: none; }
 }
@@ -2195,4 +2217,30 @@ nav#mainNav .btn-join {
   .bday-badge { font-size: 0.85rem; padding: 11px 40px 11px 16px; gap: 8px; }
   .bday-badge-emoji { font-size: 1.2em; }
   .eka-particle--balloons { width: 34px; height: 44px; }
+
+  /* Auto-shrunk state (script.js adds this ~4.5s after the banner appears):
+     collapses the full-width pill into a small tappable corner icon so it
+     stops covering the page. Tapping it (see expandBdayBadge()) restores
+     the full pill. */
+  .bday-badge.bday-collapsed {
+    top: auto;
+    bottom: 18px;
+    left: auto;
+    right: 18px;
+    transform: none;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    border-radius: 50%;
+    gap: 0;
+    justify-content: center;
+    cursor: pointer;
+    animation: bdayColorCycle 4.5s ease-in-out infinite;
+  }
+  .bday-badge.bday-collapsed .bday-badge-text,
+  .bday-badge.bday-collapsed .bday-close {
+    display: none;
+  }
+  .bday-badge.bday-collapsed::before { display: none; }
+  .bday-badge.bday-collapsed .bday-badge-emoji { font-size: 1.5em; }
 }

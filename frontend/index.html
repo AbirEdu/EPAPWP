@@ -104,8 +104,8 @@
        removed from the DOM entirely if there's no active announcement. -->
   <div id="bdayOverlay" class="bday-overlay" aria-hidden="true">
     <div class="bday-effect-layer" id="bdayEffectLayer"></div>
-    <div class="bday-badge">
-      <button type="button" class="bday-close" onclick="dismissBdayOverlay()" aria-label="Close announcement banner">&times;</button>
+    <div class="bday-badge" id="bdayBadge" onclick="expandBdayBadge()">
+      <button type="button" class="bday-close" onclick="event.stopPropagation(); dismissBdayOverlay()" aria-label="Close announcement banner">&times;</button>
       <span class="bday-badge-emoji" id="bdayBadgeEmoji">🎉</span>
       <span class="bday-badge-text" id="bdayBadgeText"></span>
     </div>

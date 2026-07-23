@@ -155,8 +155,8 @@ function escapeHtml(str) {
   const overlay = document.getElementById('bdayOverlay');
   if (!overlay) return;
 
-  const EFFECT_EMOJI = { balloons: '🎈', sparkle: '✨', rain: '🌧️', confetti: '🎉', snow: '❄️', crackers: '🎆', hearts: '💕', none: '📢' };
-  const EFFECT_PARTICLE_COUNT = { balloons: 8, sparkle: 24, rain: 40, confetti: 30, snow: 26, hearts: 20 };
+  const EFFECT_EMOJI = { balloons: '🎈', sparkle: '✨', rain: '🌧️', confetti: '🎉', snow: '❄️', crackers: '🎆', hearts: '💕', cake: '🎂', none: '📢' };
+  const EFFECT_PARTICLE_COUNT = { balloons: 8, sparkle: 24, rain: 40, confetti: 30, snow: 26, hearts: 20, cake: 10 };
   const PARTICLE_COLORS = ['#8B0000', '#d4a017', '#2f7d6b', '#c9628a', '#3a6ea5'];
 
   function renderParticles(effect) {
@@ -177,6 +177,7 @@ function escapeHtml(str) {
         el.style.setProperty('--eka-color', color);
         el.style.setProperty('--eka-color-light', color);
       }
+      if (effect === 'cake') el.textContent = '🎂';
       frag.appendChild(el);
     }
     layer.appendChild(frag);
@@ -250,7 +251,28 @@ function escapeHtml(str) {
     document.getElementById('navbarNav')?.addEventListener('shown.bs.collapse', positionBadge);
     document.getElementById('navbarNav')?.addEventListener('hidden.bs.collapse', positionBadge);
 
+    // On phones the full-width pill covers too much of the screen to leave
+    // up indefinitely, so it auto-shrinks to a small tappable icon after a
+    // few seconds; tapping it re-expands (and re-arms the same timer) until
+    // the visitor actually dismisses it via the close button. Desktop/tablet
+    // keep the pill up the whole time — plenty of room there.
+    const badge = document.getElementById('bdayBadge');
+    const isMobile = () => window.matchMedia('(max-width: 480px)').matches;
+    let collapseTimer;
+    function armCollapseTimer() {
+      clearTimeout(collapseTimer);
+      if (!isMobile()) return;
+      collapseTimer = setTimeout(() => badge.classList.add('bday-collapsed'), 4500);
+    }
+    armCollapseTimer();
+
+    window.expandBdayBadge = function () {
+      badge.classList.remove('bday-collapsed');
+      armCollapseTimer();
+    };
+
     window.dismissBdayOverlay = function () {
+      clearTimeout(collapseTimer);
       localStorage.setItem(DISMISS_KEY, fingerprint);
       overlay.classList.add('bday-overlay-hide');
       setTimeout(() => overlay.remove(), 400);
