@@ -379,42 +379,46 @@ async def list_carousel_slides(admin=Depends(require_admin)):
 @app.patch("/carousel/{slide_id}", response_model=CarouselSlideOut, tags=["carousel"])
 async def update_carousel_slide(
     slide_id: str,
-    show_name: Optional[str] = Form(None),
+    show_name: str = Form(..., min_length=2, max_length=120),
     event_date: Optional[str] = Form(None),
     venue: Optional[str] = Form(None),
-    category: Optional[str] = Form(None),
-    description: Optional[str] = Form(None),
+    category: str = Form(...),
+    description: Optional[str] = Form(None, max_length=300),
     booking_url: Optional[str] = Form(None),
-    order: Optional[int] = Form(None),
-    active: Optional[bool] = Form(None),
+    order: int = Form(0),
+    active: bool = Form(True),
     poster: Optional[UploadFile] = File(None),
     admin=Depends(require_admin),
 ):
+    # Full replace, not a sparse patch: the admin form always submits every field
+    # (see admin.js), and FastAPI's Form(None) collapses an empty string to None
+    # indistinguishably from "field not sent" — so a sparse "only update if not
+    # None" approach can never actually clear a field like booking_url.
     try: oid = ObjectId(slide_id)
     except: raise HTTPException(400, "Invalid ID")
     existing = await app.state.db.carousel.find_one({"_id": oid})
     if not existing: raise HTTPException(404, "Not found")
 
-    if category is not None and category not in VALID_CAROUSEL_CATEGORIES:
+    if category not in VALID_CAROUSEL_CATEGORIES:
         raise HTTPException(400, "Category must be EPA or PWP")
     if active and not existing.get("active"):
         active_count = await app.state.db.carousel.count_documents({"active": True})
         if active_count >= MAX_ACTIVE_SLIDES:
             raise HTTPException(400, f"Maximum of {MAX_ACTIVE_SLIDES} active slides reached. Deactivate one first.")
 
-    update = {}
-    if show_name is not None: update["show_name"] = show_name
-    if event_date is not None: update["event_date"] = event_date or None
-    if venue is not None: update["venue"] = venue or None
-    if category is not None: update["category"] = category
-    if description is not None: update["description"] = description or None
-    if booking_url is not None: update["booking_url"] = booking_url or None
-    if order is not None: update["order"] = order
-    if active is not None: update["active"] = active
+    update = {
+        "show_name": show_name,
+        "event_date": event_date or None,
+        "venue": venue or None,
+        "category": category,
+        "description": description or None,
+        "booking_url": booking_url or None,
+        "order": order,
+        "active": active,
+    }
     if poster is not None and poster.filename: update["poster_image"] = await _read_poster(poster)
 
-    if update:
-        await app.state.db.carousel.update_one({"_id": oid}, {"$set": update})
+    await app.state.db.carousel.update_one({"_id": oid}, {"$set": update})
     updated = await app.state.db.carousel.find_one({"_id": oid})
     return _serialize(updated)
 

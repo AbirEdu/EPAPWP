@@ -231,6 +231,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f4f5f7; color: #1a1a1a; 
 
 .admin-card-header h6 { font-weight: 700; font-size: 0.95rem; margin: 0; }
 .admin-card-body { padding: 20px; }
+
+.admin-card-header-collapsible { cursor: pointer; user-select: none; }
+.admin-collapse-icon { transition: transform 0.2s ease; display: inline-block; }
+.admin-card-header-collapsible.collapsed .admin-collapse-icon { transform: rotate(-90deg); }
 .btn-link { background: none; border: none; color: var(--crimson); font-size: 0.82rem; cursor: pointer; }
 
 /* ── TABLE ── */

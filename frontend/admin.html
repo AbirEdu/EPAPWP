@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel — Ekalavya Performing Arts</title>
+  <title>EPA PWP Admin Panel</title>
   <meta name="robots" content="noindex, nofollow">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -54,7 +54,7 @@
       <div class="sidebar-brand">
         <i class="bi bi-masks-theater brand-icon"></i>
         <div>
-          <span class="brand-title">Ekalavya</span>
+          <span class="brand-title">EPA PWP</span>
           <span class="brand-sub">Admin Panel</span>
         </div>
       </div>
@@ -139,38 +139,42 @@
       <!-- FEEDBACK TAB -->
       <div id="tab-feedback" class="tab-pane d-none">
         <div class="admin-card mb-4">
-          <div class="admin-card-header">
-            <h6>Written Feedback</h6>
-            <button class="btn btn-sm btn-crimson" onclick="loadFeedback()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+          <div class="admin-card-header admin-card-header-collapsible collapsed" data-bs-toggle="collapse" data-bs-target="#feedbackCollapse" role="button" aria-expanded="false" aria-controls="feedbackCollapse">
+            <h6><i class="bi bi-chevron-down admin-collapse-icon"></i> Written Feedback</h6>
+            <button class="btn btn-sm btn-crimson" onclick="event.stopPropagation(); loadFeedback()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
           </div>
-          <div class="admin-card-body">
-            <div id="feedbackList" class="feedback-admin-list">Loading...</div>
+          <div class="collapse" id="feedbackCollapse">
+            <div class="admin-card-body">
+              <div id="feedbackList" class="feedback-admin-list">Loading...</div>
+            </div>
           </div>
         </div>
         <div class="admin-card">
-          <div class="admin-card-header">
-            <h6>Video Feedback</h6>
-            <button class="btn btn-sm btn-crimson" onclick="loadVideoFeedback()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+          <div class="admin-card-header admin-card-header-collapsible collapsed" data-bs-toggle="collapse" data-bs-target="#videoFeedbackCollapse" role="button" aria-expanded="false" aria-controls="videoFeedbackCollapse">
+            <h6><i class="bi bi-chevron-down admin-collapse-icon"></i> Video Feedback</h6>
+            <button class="btn btn-sm btn-crimson" onclick="event.stopPropagation(); loadVideoFeedback()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
           </div>
-          <div class="admin-card-body">
-            <form id="videoLinkForm" class="row g-3 mb-4">
-              <div class="col-md-4">
-                <label class="form-label">Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="name" placeholder="e.g. Priya Sharma" required minlength="2">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">YouTube URL <span class="text-danger">*</span></label>
-                <input type="url" class="form-control" name="youtube_url" placeholder="https://www.youtube.com/watch?v=..." required>
-              </div>
-              <div class="col-md-2 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-crimson w-100" id="videoLinkSubmitBtn"><i class="bi bi-plus-lg"></i> Add</button>
-                <button type="button" class="btn btn-outline-secondary d-none" id="videoLinkCancelBtn" onclick="cancelVideoFeedbackEdit()">Cancel</button>
-              </div>
-              <div class="col-12">
-                <div id="videoLinkFormAlert" class="alert d-none py-2 small mb-0"></div>
-              </div>
-            </form>
-            <div id="videoFeedbackList" class="feedback-admin-list">Loading...</div>
+          <div class="collapse" id="videoFeedbackCollapse">
+            <div class="admin-card-body">
+              <form id="videoLinkForm" class="row g-3 mb-4">
+                <div class="col-md-4">
+                  <label class="form-label">Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" placeholder="e.g. Priya Sharma" required minlength="2">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">YouTube URL <span class="text-danger">*</span></label>
+                  <input type="url" class="form-control" name="youtube_url" placeholder="https://www.youtube.com/watch?v=..." required>
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                  <button type="submit" class="btn btn-crimson w-100" id="videoLinkSubmitBtn"><i class="bi bi-plus-lg"></i> Add</button>
+                  <button type="button" class="btn btn-outline-secondary d-none" id="videoLinkCancelBtn" onclick="cancelVideoFeedbackEdit()">Cancel</button>
+                </div>
+                <div class="col-12">
+                  <div id="videoLinkFormAlert" class="alert d-none py-2 small mb-0"></div>
+                </div>
+              </form>
+              <div id="videoFeedbackList" class="feedback-admin-list">Loading...</div>
+            </div>
           </div>
         </div>
       </div>
