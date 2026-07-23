@@ -357,11 +357,72 @@ async function deleteFeedback(id) {
 }
 
 // ─── VIDEO FEEDBACK ───
+let _videoFeedbackCache = [];
+let editingVideoFeedbackId = null;
+
+function editVideoFeedback(id) {
+  const item = _videoFeedbackCache.find(f => f.id === id);
+  if (!item) return;
+  editingVideoFeedbackId = id;
+
+  const form = document.getElementById('videoLinkForm');
+  form.name.value = item.name || '';
+  form.youtube_url.value = `https://www.youtube.com/watch?v=${item.youtube_video_id}`;
+
+  document.getElementById('videoLinkSubmitBtn').innerHTML = '<i class="bi bi-check-lg"></i> Update';
+  document.getElementById('videoLinkCancelBtn').classList.remove('d-none');
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelVideoFeedbackEdit() {
+  editingVideoFeedbackId = null;
+  const form = document.getElementById('videoLinkForm');
+  form.reset();
+  document.getElementById('videoLinkFormAlert').classList.add('d-none');
+  const btn = document.getElementById('videoLinkSubmitBtn');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="bi bi-plus-lg"></i> Add';
+  document.getElementById('videoLinkCancelBtn').classList.add('d-none');
+}
+
+document.getElementById('videoLinkForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('videoLinkSubmitBtn');
+  const alertEl = document.getElementById('videoLinkFormAlert');
+  alertEl.classList.add('d-none');
+  const wasEditing = editingVideoFeedbackId;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+  const body = {
+    name: form.name.value,
+    youtube_url: form.youtube_url.value,
+  };
+
+  try {
+    if (wasEditing) {
+      await apiPatch(`/feedback/video/${wasEditing}`, body);
+    } else {
+      await apiPost('/feedback/video/link', body);
+    }
+    cancelVideoFeedbackEdit();
+    showToast(wasEditing ? 'Video updated' : 'Video added', 'success');
+    loadVideoFeedback();
+  } catch (err) {
+    alertEl.className = 'alert alert-danger py-2 small mb-0';
+    alertEl.textContent = err.message;
+    alertEl.classList.remove('d-none');
+    btn.disabled = false;
+    btn.innerHTML = wasEditing ? '<i class="bi bi-check-lg"></i> Update' : '<i class="bi bi-plus-lg"></i> Add';
+  }
+});
+
 async function loadVideoFeedback() {
   const el = document.getElementById('videoFeedbackList');
   el.innerHTML = '<div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span></div>';
   try {
     const items = await apiGet('/feedback/video?limit=50');
+    _videoFeedbackCache = items;
     el.innerHTML = items.length ? items.map(f => `
       <div class="feedback-item">
         <div class="feedback-item-header">
@@ -377,6 +438,7 @@ async function loadVideoFeedback() {
         <div class="d-flex gap-1 mt-2">
           ${f.status !== 'approved' ? `<button class="btn-sm-action btn-approve" onclick="setVideoFeedbackStatus('${f.id}','approved',this)">Approve</button>` : ''}
           ${f.status !== 'rejected' ? `<button class="btn-sm-action btn-inactive" onclick="setVideoFeedbackStatus('${f.id}','rejected',this)">Reject</button>` : ''}
+          <button class="btn-sm-action btn-view" onclick="editVideoFeedback('${f.id}')">Edit</button>
           <button class="btn-sm-action btn-inactive" onclick="deleteVideoFeedback('${f.id}')">Delete</button>
         </div>
       </div>`).join('') : '<p class="text-muted text-center py-4">No video feedback yet.</p>';
@@ -403,6 +465,7 @@ async function deleteVideoFeedback(id) {
     const token = getToken();
     const res = await fetch(`${API}/feedback/video/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.detail || `HTTP ${res.status}`); }
+    if (editingVideoFeedbackId === id) cancelVideoFeedbackEdit();
     showToast('Video feedback deleted', 'success');
     loadVideoFeedback();
   } catch (err) {

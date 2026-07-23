@@ -99,6 +99,10 @@ class CarouselSlideOut(BaseModel):
     created_at: Optional[datetime] = None
     class Config: orm_mode = True
 
+class VideoFeedbackLinkCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=120)
+    youtube_url: str = Field(..., min_length=1)
+
 class VideoFeedbackPublicOut(BaseModel):
     id: str
     name: str

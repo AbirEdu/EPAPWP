@@ -10,7 +10,7 @@ import asyncio, os, jwt, bcrypt, base64, re
 from app.models import (
     MemberRegistration, MemberRegistrationOut,
     FeedbackCreate, FeedbackOut, FeedbackPublicOut,
-    VideoFeedbackOut, VideoFeedbackPublicOut,
+    VideoFeedbackOut, VideoFeedbackPublicOut, VideoFeedbackLinkCreate,
     LoginRequest, TokenResponse, UserCreate, UserOut,
     CarouselSlideOut, VALID_CAROUSEL_CATEGORIES,
     AnnouncementSettings, AnnouncementOut,
@@ -259,6 +259,23 @@ async def submit_video_feedback(
     created = await app.state.db.video_feedback.find_one({"_id": result.inserted_id})
     return _serialize(created)
 
+@app.post("/feedback/video/link", response_model=VideoFeedbackOut, tags=["feedback"], status_code=201)
+async def add_video_feedback_link(payload: VideoFeedbackLinkCreate, admin=Depends(require_admin)):
+    # Admin-curated shortcut: paste an existing YouTube link instead of uploading a
+    # file. Stored in the same video_feedback collection as uploaded submissions
+    # (just the extracted ID, like performances) and pre-approved since the admin
+    # is the one adding it — it appears on the Wall of Applause immediately.
+    doc = {
+        "name": payload.name,
+        "youtube_video_id": extract_youtube_video_id(payload.youtube_url),
+        "duration": None,
+        "status": "approved",
+        "created_at": datetime.utcnow(),
+    }
+    result = await app.state.db.video_feedback.insert_one(doc)
+    created = await app.state.db.video_feedback.find_one({"_id": result.inserted_id})
+    return _serialize(created)
+
 @app.get("/feedback/video/approved", response_model=List[VideoFeedbackPublicOut], tags=["feedback"])
 async def list_approved_video_feedback(limit: int = Query(default=12, le=50)):
     cursor = app.state.db.video_feedback.find({"status": "approved"}).sort("created_at", -1).limit(limit)
@@ -270,6 +287,22 @@ async def list_video_feedback(skip:int=0, limit:int=Query(default=20,le=100), st
     if status: query["status"] = status
     cursor = app.state.db.video_feedback.find(query).skip(skip).limit(limit).sort("created_at",-1)
     return [_serialize(i) for i in await cursor.to_list(length=limit)]
+
+@app.patch("/feedback/video/{video_id}", response_model=VideoFeedbackOut, tags=["feedback"])
+async def update_video_feedback(video_id: str, payload: VideoFeedbackLinkCreate, admin=Depends(require_admin)):
+    # Lets an admin correct the name or swap the underlying YouTube video for any
+    # video_feedback entry — whether it was uploaded via the public form or added
+    # by URL — without touching its status.
+    try: oid = ObjectId(video_id)
+    except: raise HTTPException(400, "Invalid ID")
+    existing = await app.state.db.video_feedback.find_one({"_id": oid})
+    if not existing: raise HTTPException(404, "Not found")
+    update = {
+        "name": payload.name,
+        "youtube_video_id": extract_youtube_video_id(payload.youtube_url),
+    }
+    await app.state.db.video_feedback.update_one({"_id": oid}, {"$set": update})
+    return _serialize(await app.state.db.video_feedback.find_one({"_id": oid}))
 
 @app.patch("/feedback/video/{video_id}/status", tags=["feedback"])
 async def update_video_feedback_status(video_id: str, status: str, admin=Depends(require_admin)):
