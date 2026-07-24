@@ -686,6 +686,34 @@ body {
 .footer-admin-link { color: #aaa; text-decoration: none; }
 .footer-admin-link:hover { color: var(--gold); }
 
+.aboseco-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 1.15em;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-decoration: none;
+  background: linear-gradient(90deg, #fff200, #ff3131, #ff00e5, #00e5ff, #fff200);
+  background-size: 400% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 6px rgba(255, 242, 0, 0.5));
+  animation: aboseco-shine 4s linear infinite;
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+.aboseco-link i { color: #fff200; }
+.aboseco-link:hover {
+  filter: drop-shadow(0 0 12px rgba(255, 0, 229, 0.85));
+  transform: translateY(-1px);
+  animation-duration: 1.2s;
+}
+
+@keyframes aboseco-shine {
+  to { background-position: 300% center; }
+}
+
 /* ===== REGISTRATION MODAL ===== */
 .register-modal {
   background: var(--cream);
